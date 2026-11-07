@@ -1,0 +1,376 @@
+# Production recipes: any number of tradable inputs -> any number of outputs.
+#
+#   name    - unique label for the action
+#   skill   - skill the XP goes to
+#   xp      - XP gained per action
+#   inputs  - item name = quantity consumed per action
+#   outputs - item name = quantity produced per action
+#
+# Item names must match the GE names on the OSRS Wiki exactly (case-insensitive).
+# Quantities may be fractional (e.g. Thread is used up once per 5 crafts = 0.2).
+# Use "Coins" for flat gp costs such as NPC fees.
+# Values are per single action; burns/failures are ignored in this MVP.
+
+# Outputs that are rare or chance-based by-products, not a guaranteed result of
+# the action. The Wiki lists these as recipes, so any recipe producing one of
+# these is ignored. Add names here as you find them (case-insensitive).
+exclude_outputs = [
+  "Squid beak",  # 1/1,024 or 1/512 chance when cutting squid
+]
+
+# Hand-set production speeds (actions per hour), by recipe name as shown on the
+# results page. These replace the estimate from Wiki ticks + banking. Useful for
+# runecrafting (travel-bound, so it has no estimate by default) or anything
+# whose estimate you know is off. Example:
+#   "Blood rune" = 4000
+[actions_per_hour]
+# Blast Furnace: the inventory + bank model doesn't fit (coal bag, conveyor belt).
+# Bars/hour from the Wiki money making guides (200 trips/hr, coal bag, stamina):
+# https://oldschool.runescape.wiki/w/Money_making_guide/Smelting_runite_bars_at_Blast_Furnace
+"Runite bar (Blast Furnace)" = 2160
+"Adamantite bar (Blast Furnace)" = 2700
+"Mithril bar (Blast Furnace)" = 3600
+"Steel bar (Blast Furnace)" = 5400
+"Iron bar (Blast Furnace)" = 6000
+
+# Running costs that are charged per hour rather than per item, by recipe name.
+# Spread over the recipe's actions/hour and added to its cost.
+[coins_per_hour]
+# Blast Furnace coffer: 1,200 coins per minute on official Blast Furnace worlds.
+"Runite bar (Blast Furnace)" = 72000
+"Adamantite bar (Blast Furnace)" = 72000
+"Mithril bar (Blast Furnace)" = 72000
+"Steel bar (Blast Furnace)" = 72000
+"Iron bar (Blast Furnace)" = 72000
+
+# The method you'd normally train each skill with (a recipe name as shown on the
+# results page). Each recipe's "XP pace" compares its XP/hr to this method's, so
+# you can see how much training speed you give up for the gp. Skills not listed
+# show no pace.
+[normal_training]
+Fletching = "String magic longbow"
+Herblore = "Make saradomin brew(3)"
+Cooking = "Cook anglerfish"
+Crafting = "Black d'hide body (Needle)"
+Smithing = "Smith rune platebody"
+Magic = "Red dragon leather (Tan leather spell)"
+
+# ---------------- Fletching ----------------
+[[recipe]]
+name = "Cut maple longbow (u)"
+skill = "Fletching"
+xp = 58.3
+inputs = { "Maple logs" = 1 }
+outputs = { "Maple longbow (u)" = 1 }
+
+[[recipe]]
+name = "String maple longbow"
+skill = "Fletching"
+xp = 58.3
+inputs = { "Maple longbow (u)" = 1, "Bow string" = 1 }
+outputs = { "Maple longbow" = 1 }
+
+[[recipe]]
+name = "Cut yew shortbow (u)"
+skill = "Fletching"
+xp = 67.5
+inputs = { "Yew logs" = 1 }
+outputs = { "Yew shortbow (u)" = 1 }
+
+[[recipe]]
+name = "String yew shortbow"
+skill = "Fletching"
+xp = 67.5
+inputs = { "Yew shortbow (u)" = 1, "Bow string" = 1 }
+outputs = { "Yew shortbow" = 1 }
+
+[[recipe]]
+name = "Cut yew longbow (u)"
+skill = "Fletching"
+xp = 75
+inputs = { "Yew logs" = 1 }
+outputs = { "Yew longbow (u)" = 1 }
+
+[[recipe]]
+name = "String yew longbow"
+skill = "Fletching"
+xp = 75
+inputs = { "Yew longbow (u)" = 1, "Bow string" = 1 }
+outputs = { "Yew longbow" = 1 }
+
+[[recipe]]
+name = "Cut magic shortbow (u)"
+skill = "Fletching"
+xp = 83.3
+inputs = { "Magic logs" = 1 }
+outputs = { "Magic shortbow (u)" = 1 }
+
+[[recipe]]
+name = "String magic shortbow"
+skill = "Fletching"
+xp = 83.3
+inputs = { "Magic shortbow (u)" = 1, "Bow string" = 1 }
+outputs = { "Magic shortbow" = 1 }
+
+[[recipe]]
+name = "Cut magic longbow (u)"
+skill = "Fletching"
+xp = 91.5
+inputs = { "Magic logs" = 1 }
+outputs = { "Magic longbow (u)" = 1 }
+
+[[recipe]]
+name = "String magic longbow"
+skill = "Fletching"
+xp = 91.5
+inputs = { "Magic longbow (u)" = 1, "Bow string" = 1 }
+outputs = { "Magic longbow" = 1 }
+
+[[recipe]]
+name = "Fletch rune dart"
+skill = "Fletching"
+xp = 18.8
+inputs = { "Rune dart tip" = 1, "Feather" = 1 }
+outputs = { "Rune dart" = 1 }
+
+[[recipe]]
+name = "Fletch dragon dart"
+skill = "Fletching"
+xp = 25
+inputs = { "Dragon dart tip" = 1, "Feather" = 1 }
+outputs = { "Dragon dart" = 1 }
+
+# ---------------- Herblore ----------------
+[[recipe]]
+name = "Clean grimy ranarr weed"
+skill = "Herblore"
+xp = 7.5
+inputs = { "Grimy ranarr weed" = 1 }
+outputs = { "Ranarr weed" = 1 }
+
+[[recipe]]
+name = "Clean grimy toadflax"
+skill = "Herblore"
+xp = 8
+inputs = { "Grimy toadflax" = 1 }
+outputs = { "Toadflax" = 1 }
+
+[[recipe]]
+name = "Clean grimy snapdragon"
+skill = "Herblore"
+xp = 11.8
+inputs = { "Grimy snapdragon" = 1 }
+outputs = { "Snapdragon" = 1 }
+
+[[recipe]]
+name = "Clean grimy torstol"
+skill = "Herblore"
+xp = 15
+inputs = { "Grimy torstol" = 1 }
+outputs = { "Torstol" = 1 }
+
+[[recipe]]
+name = "Make ranarr potion (unf)"
+skill = "Herblore"
+xp = 0
+inputs = { "Ranarr weed" = 1, "Vial of water" = 1 }
+outputs = { "Ranarr potion (unf)" = 1 }
+
+[[recipe]]
+name = "Make toadflax potion (unf)"
+skill = "Herblore"
+xp = 0
+inputs = { "Toadflax" = 1, "Vial of water" = 1 }
+outputs = { "Toadflax potion (unf)" = 1 }
+
+[[recipe]]
+name = "Make snapdragon potion (unf)"
+skill = "Herblore"
+xp = 0
+inputs = { "Snapdragon" = 1, "Vial of water" = 1 }
+outputs = { "Snapdragon potion (unf)" = 1 }
+
+[[recipe]]
+name = "Make prayer potion(3)"
+skill = "Herblore"
+xp = 87.5
+inputs = { "Ranarr potion (unf)" = 1, "Snape grass" = 1 }
+outputs = { "Prayer potion(3)" = 1 }
+
+[[recipe]]
+name = "Make super restore(3)"
+skill = "Herblore"
+xp = 142.5
+inputs = { "Snapdragon potion (unf)" = 1, "Red spiders' eggs" = 1 }
+outputs = { "Super restore(3)" = 1 }
+
+[[recipe]]
+name = "Make saradomin brew(3)"
+skill = "Herblore"
+xp = 180
+inputs = { "Toadflax potion (unf)" = 1, "Crushed nest" = 1 }
+outputs = { "Saradomin brew(3)" = 1 }
+
+# ---------------- Cooking (burns ignored) ----------------
+[[recipe]]
+name = "Cook lobster"
+skill = "Cooking"
+xp = 120
+inputs = { "Raw lobster" = 1 }
+outputs = { "Lobster" = 1 }
+
+[[recipe]]
+name = "Cook swordfish"
+skill = "Cooking"
+xp = 140
+inputs = { "Raw swordfish" = 1 }
+outputs = { "Swordfish" = 1 }
+
+[[recipe]]
+name = "Cook monkfish"
+skill = "Cooking"
+xp = 150
+inputs = { "Raw monkfish" = 1 }
+outputs = { "Monkfish" = 1 }
+
+[[recipe]]
+name = "Cook karambwan"
+skill = "Cooking"
+xp = 190
+inputs = { "Raw karambwan" = 1 }
+outputs = { "Cooked karambwan" = 1 }
+
+[[recipe]]
+name = "Cook shark"
+skill = "Cooking"
+xp = 210
+inputs = { "Raw shark" = 1 }
+outputs = { "Shark" = 1 }
+
+[[recipe]]
+name = "Cook manta ray"
+skill = "Cooking"
+xp = 216.2
+inputs = { "Raw manta ray" = 1 }
+outputs = { "Manta ray" = 1 }
+
+[[recipe]]
+name = "Cook anglerfish"
+skill = "Cooking"
+xp = 230
+inputs = { "Raw anglerfish" = 1 }
+outputs = { "Anglerfish" = 1 }
+
+# ---------------- Crafting ----------------
+[[recipe]]
+name = "Cut sapphire"
+skill = "Crafting"
+xp = 50
+inputs = { "Uncut sapphire" = 1 }
+outputs = { "Sapphire" = 1 }
+
+[[recipe]]
+name = "Cut emerald"
+skill = "Crafting"
+xp = 67.5
+inputs = { "Uncut emerald" = 1 }
+outputs = { "Emerald" = 1 }
+
+[[recipe]]
+name = "Cut ruby"
+skill = "Crafting"
+xp = 85
+inputs = { "Uncut ruby" = 1 }
+outputs = { "Ruby" = 1 }
+
+[[recipe]]
+name = "Cut diamond"
+skill = "Crafting"
+xp = 107.5
+inputs = { "Uncut diamond" = 1 }
+outputs = { "Diamond" = 1 }
+
+[[recipe]]
+name = "Cut dragonstone"
+skill = "Crafting"
+xp = 137.5
+inputs = { "Uncut dragonstone" = 1 }
+outputs = { "Dragonstone" = 1 }
+
+[[recipe]]
+name = "Smelt molten glass (furnace)"
+skill = "Crafting"
+xp = 20
+inputs = { "Bucket of sand" = 1, "Soda ash" = 1 }
+outputs = { "Molten glass" = 1, "Bucket" = 1 }
+
+[[recipe]]
+name = "Tan green dragonhide (tanner)"
+skill = "Crafting"
+xp = 0
+inputs = { "Green dragonhide" = 1, "Coins" = 20 }
+outputs = { "Green dragon leather" = 1 }
+
+[[recipe]]
+name = "Craft green d'hide body"
+skill = "Crafting"
+xp = 186
+inputs = { "Green dragon leather" = 3, "Thread" = 0.2 }
+outputs = { "Green d'hide body" = 1 }
+
+[[recipe]]
+name = "Craft black d'hide body"
+skill = "Crafting"
+xp = 258
+inputs = { "Black dragon leather" = 3, "Thread" = 0.2 }
+outputs = { "Black d'hide body" = 1 }
+
+# ---------------- Smithing ----------------
+[[recipe]]
+name = "Smelt gold bar"
+skill = "Smithing"
+xp = 22.5
+inputs = { "Gold ore" = 1 }
+outputs = { "Gold bar" = 1 }
+
+[[recipe]]
+name = "Smelt steel bar"
+skill = "Smithing"
+xp = 17.5
+inputs = { "Iron ore" = 1, "Coal" = 2 }
+outputs = { "Steel bar" = 1 }
+
+[[recipe]]
+name = "Smelt mithril bar"
+skill = "Smithing"
+xp = 30
+inputs = { "Mithril ore" = 1, "Coal" = 4 }
+outputs = { "Mithril bar" = 1 }
+
+[[recipe]]
+name = "Smelt adamantite bar"
+skill = "Smithing"
+xp = 37.5
+inputs = { "Adamantite ore" = 1, "Coal" = 6 }
+outputs = { "Adamantite bar" = 1 }
+
+[[recipe]]
+name = "Smelt runite bar"
+skill = "Smithing"
+xp = 50
+inputs = { "Runite ore" = 1, "Coal" = 8 }
+outputs = { "Runite bar" = 1 }
+
+[[recipe]]
+name = "Make cannonballs"
+skill = "Smithing"
+xp = 25.6
+inputs = { "Steel bar" = 1 }
+outputs = { "Steel cannonball" = 4 }
+
+[[recipe]]
+name = "Smith rune platebody"
+skill = "Smithing"
+xp = 375
+inputs = { "Runite bar" = 5 }
+outputs = { "Rune platebody" = 1 }

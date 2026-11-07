@@ -1,0 +1,65 @@
+# Rebuilds the results page every hour with fresh GE prices and publishes it
+# to GitHub Pages. Also runs on demand from the Actions tab ("Run workflow").
+name: Update prices
+
+on:
+  schedule:
+    - cron: "7 * * * *"   # every hour at :07, shortly after the 1-hour averages update
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # The Wiki asks API users to identify themselves; the repo address is the contact.
+      GE_PROFIT_USER_AGENT: "osrs-ge-profit (+https://github.com/${{ github.repository }})"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run tests
+        run: python -m unittest
+
+      # Recipes change rarely, so download them from the Wiki at most once a day.
+      - name: Today's date
+        id: day
+        run: echo "day=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: data/wiki_recipes.json
+          key: wiki-recipes-${{ steps.day.outputs.day }}
+      - name: Download Wiki recipes (if not cached today)
+        run: test -f data/wiki_recipes.json || python wiki_recipes.py
+
+      - name: Build the page
+        run: |
+          mkdir -p site
+          python ge_profit.py --html site/index.html > /dev/null
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

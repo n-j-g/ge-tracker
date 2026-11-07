@@ -1,0 +1,7 @@
+# Generated output and local caches: rebuilt by the hourly job
+results.html
+site/
+data/
+__pycache__/
+*.pyc
+.DS_Store
