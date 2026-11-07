@@ -92,7 +92,9 @@ def rows_for(ts: int, data: dict) -> list[tuple]:
 def connect(path: Path) -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(str(path))
-    con.execute("PRAGMA journal_mode=WAL")
+    # TRUNCATE rather than WAL: works on shared/virtual folders (e.g. a sandbox
+    # reading the database) where WAL's shared memory or file deletion fails.
+    con.execute("PRAGMA journal_mode=TRUNCATE")
     con.execute("PRAGMA synchronous=NORMAL")
     con.executescript(SCHEMA)
     return con
