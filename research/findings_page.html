@@ -1,0 +1,518 @@
+<meta name="dash-one-writer">
+<style>
+  .gx { max-width: 72rem; margin-inline: auto; display: grid; gap: var(--cds-gap-xl); font-family: var(--font-anthropic-sans); color: var(--color-fg); }
+  .gx-head { display: grid; gap: var(--cds-gap-sm); }
+  .gx-head h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
+  .gx-lede { font-size: var(--cds-font-size-body); line-height: 1.55; max-width: 68ch; margin: 0; }
+  .gx-scope { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 0; }
+  .gx-section { display: grid; gap: var(--cds-gap-md); }
+  .gx-section > h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; text-wrap: balance; }
+  .gx-section > p { margin: 0; line-height: 1.55; max-width: 68ch; }
+  .gx b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .gx-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-sm); min-width: 0; }
+  .gx-card h3 { font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); margin: 0; }
+  .gx-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 0; line-height: 1.5; }
+  .gx-chart { position: relative; min-width: 0; }
+  .gx-chart.decay { min-height: 300px; }
+  .gx-chart.dumbbell { min-height: 420px; }
+  .gx-chart.multiples { min-height: 330px; }
+  .gx-legend { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .gx-legend span { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); }
+  .gx-sw { width: 0.75rem; height: 0.75rem; border-radius: 50%; display: inline-block; }
+  .gx-sw.muted { background: var(--cds-chart-muted); }
+  .gx-sw.line { height: 2px; width: 1rem; border-radius: 1px; }
+  .gx-sw.line.muted { background: var(--cds-chart-muted); }
+  .gx-table-wrap { overflow: auto; max-height: 34rem; }
+  .gx table { border-collapse: collapse; width: 100%; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .gx th, .gx td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); text-align: right; white-space: nowrap; }
+  .gx th { position: sticky; top: 0; background: var(--color-panel); font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); vertical-align: bottom; }
+  .gx th.l, .gx td.l { text-align: left; }
+  .gx td.l { white-space: normal; min-width: 9rem; }
+  .gx th button { all: unset; cursor: pointer; display: inline-block; }
+  .gx th button:focus-visible { outline: 2px solid var(--color-fg-muted); outline-offset: 2px; border-radius: 2px; }
+  .gx th[aria-sort="descending"] button::after { content: " ↓"; }
+  .gx th[aria-sort="ascending"] button::after { content: " ↑"; }
+  .gx td.good { color: var(--color-ok); }
+  .gx td.bad { color: var(--color-bad); }
+  .gx-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); line-height: 1.45; white-space: nowrap; z-index: 2; }
+  .gx-tip .t { color: var(--cds-text-secondary); }
+  .gx-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: var(--cds-gap-md); }
+  .gx-panel { min-width: 0; }
+  .gx-panel .name { font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); }
+  .gx details { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.55; }
+  .gx details summary { cursor: pointer; color: var(--color-fg); font-size: var(--cds-font-size-body); }
+  .gx details dl { display: grid; grid-template-columns: minmax(8rem, max-content) 1fr; gap: var(--cds-gap-xs) var(--cds-gap-md); margin: var(--cds-gap-sm) 0 0; }
+  .gx details dt { color: var(--color-fg); font-weight: var(--cds-font-weight-medium); }
+  .gx details dd { margin: 0; max-width: 70ch; }
+  [data-dash-source-state=empty] { color: transparent; }
+  [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+  .gx-fail { display: flex; align-items: center; justify-content: center; gap: var(--cds-gap-xs); min-height: inherit; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .gx-fail::before { content: ""; width: 0.375rem; height: 0.375rem; border-radius: 50%; background: var(--color-bad); }
+  @media (max-width: 40rem) { .gx details dl { grid-template-columns: 1fr; } }
+</style>
+
+<div class="gx">
+  <header class="gx-head" id="top">
+    <h1>GE price history findings</h1>
+    <p class="gx-lede">Processing chains made money in a median <b data-draw="val" data-source="summary" data-field="median_hours_profitable" data-row="0" data-fmt="pct1">—</b> of hours. When a margin got unusually wide, half of the extra was typically gone within <b data-draw="val" data-source="summary" data-field="median_half_life_h" data-row="0" data-fmt="int">—</b> hours. The price of XP moved far more than any buying trick saves.</p>
+    <p class="gx-scope"><span data-draw="val" data-source="study" data-field="hours" data-row="0" data-fmt="int">—</span> hourly snapshots from <span data-draw="val" data-source="study" data-field="first_hour" data-row="0" data-fmt="date">—</span> to <span data-draw="val" data-source="study" data-field="last_hour" data-row="0" data-fmt="date">—</span>, <span data-draw="val" data-source="study" data-field="items" data-row="0" data-fmt="int">—</span> items, <span data-draw="val" data-source="study" data-field="chains" data-row="0" data-fmt="int">—</span> processing chains and <span data-draw="val" data-source="study" data-field="methods" data-row="0" data-fmt="int">—</span> training methods. Prices are Grand Exchange hourly averages from the OSRS Wiki, after the GE tax in force at the time.</p>
+  </header>
+
+  <section class="gx-section" id="profitable">
+    <h2>Processing pays almost every hour</h2>
+    <p><b data-draw="val" data-source="summary" data-field="profitable" data-row="0" data-fmt="int">—</b> of the <b data-draw="val" data-source="summary" data-field="chains" data-row="0" data-fmt="int">—</b> chains make money when you buy and sell instantly. For those, losing spells are short, typically <b data-draw="val" data-source="summary" data-field="typical_losing_spell_h" data-row="0" data-fmt="num1">—</b> hours. These margins behave like a wage for your time, not a trading opportunity: they are almost always there, and they come back quickly when they dip.</p>
+    <div class="gx-card">
+      <h3>Every chain studied</h3>
+      <p class="gx-note">Click a column to sort. Half-life is how long an unusually wide margin takes to lose half its extra. "Moves first" says whether the product's price or the materials' price tends to move first.</p>
+      <div class="gx-table-wrap">
+        <table data-source="chains" data-row-key="chain" id="chains-table">
+          <thead><tr>
+            <th class="l" data-field="chain"><button type="button" data-table="chains" data-key="chain">Chain</button></th>
+            <th class="l" data-field="skill"><button type="button" data-table="chains" data-key="skill">Skill</button></th>
+            <th data-field="hours_profitable"><button type="button" data-table="chains" data-key="hours_profitable">Hours profitable</button></th>
+            <th data-field="longest_losing_spell_h"><button type="button" data-table="chains" data-key="longest_losing_spell_h">Longest losing spell (h)</button></th>
+            <th data-field="half_life_h"><button type="button" data-table="chains" data-key="half_life_h">Half-life (h)</button></th>
+            <th data-field="margin_2024_gp"><button type="button" data-table="chains" data-key="margin_2024_gp">2024 margin (gp)</button></th>
+            <th data-field="margin_2026_gp"><button type="button" data-table="chains" data-key="margin_2026_gp">2026 margin (gp)</button></th>
+            <th class="l" data-field="moves_first"><button type="button" data-table="chains" data-key="moves_first">Moves first</button></th>
+          </tr></thead>
+          <tbody data-draw="chains-rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="gx-section" id="fade">
+    <h2>Unusual margins fade within about a day</h2>
+    <p>Each line follows the moment a chain's margin entered its widest <span data-draw="const" data-key="top_share">—</span> compared with the previous <span data-draw="const" data-key="norm_days">—</span>, then tracks how much of that extra was left in the hours after. Most chains lose half of it within a day and nearly all within a week. Blast Furnace bars, cannonballs, sharks and karambwans are the slow ones: their wide margins tend to stick around.</p>
+    <div class="gx-card">
+      <h3>Share of an unusually wide margin left, by hours since it appeared</h3>
+      <div class="gx-legend"><span><i class="gx-sw line" data-draw="accent-swatch"></i>Median across chains</span><span><i class="gx-sw line muted"></i>One chain</span></div>
+      <div class="gx-chart decay dash-skeleton" data-draw="decay-chart" data-source="decay decay_median" id="decay-chart"></div>
+    </div>
+  </section>
+
+  <section class="gx-section" id="wider">
+    <h2>Margins are wider than in 2024, despite the tax doubling</h2>
+    <p><b data-draw="val" data-source="summary" data-field="wider_in_2026" data-row="0" data-fmt="int">—</b> of the <b data-draw="val" data-source="summary" data-field="profitable" data-row="0" data-fmt="int">—</b> profitable chains pay more per action in 2026 than in 2024, although the GE tax went up in <span data-draw="const" data-key="tax_up">—</span>. The Blast Furnace runite margin roughly doubled because runite ore got cheaper while the bar price stayed flat.</p>
+    <div class="gx-card">
+      <h3>Typical margin per action, 2024 and 2026</h3>
+      <div class="gx-legend"><span><i class="gx-sw muted"></i>2024</span><span><i class="gx-sw" data-draw="accent-swatch"></i>2026</span></div>
+      <div class="gx-chart dumbbell dash-skeleton" data-draw="dumbbell-chart" data-source="chains" id="dumbbell-chart"></div>
+    </div>
+  </section>
+
+  <section class="gx-section" id="xp-price">
+    <h2>The price of XP moves a lot, and timing matters</h2>
+    <p>For each skill, the line is the gold lost per XP with the cheapest of its standard training methods, week by week. Below zero means the method pays you to train. <span data-draw="const" data-key="goal_xp">—</span> of Prayer XP cost <b data-draw="val" data-source="xp_skills" data-field="cost_10m_cheapest" data-where="skill=Prayer" data-fmt="compact">—</b> in the cheapest month and <b data-draw="val" data-source="xp_skills" data-field="cost_10m_dearest" data-where="skill=Prayer" data-fmt="compact">—</b> in the dearest.</p>
+    <div class="gx-card">
+      <h3>Gold per XP, cheapest standard method, weekly</h3>
+      <p class="gx-note">Each skill has its own scale. The dashed line is zero.</p>
+      <div class="gx-chart multiples dash-skeleton" data-draw="multiples-chart" data-source="xp_weekly" id="multiples-chart"></div>
+    </div>
+    <div class="gx-card">
+      <h3>Where each skill's XP price stands now</h3>
+      <p class="gx-note">Goal cost is what <span data-draw="const" data-key="goal_xp">—</span> would cost at that month's prices. "Now" is the last <span data-draw="const" data-key="now_days">—</span>. "Past days cheaper" is the share of days since 2021 when this skill's XP cost less than now: low means now is a good time to train it.</p>
+      <div class="gx-table-wrap">
+        <table data-source="xp_skills" data-row-key="skill" id="skills-table">
+          <thead><tr>
+            <th class="l" data-field="skill"><button type="button" data-table="skills" data-key="skill">Skill</button></th>
+            <th class="l" data-field="usual_method"><button type="button" data-table="skills" data-key="usual_method">Usually cheapest method</button></th>
+            <th data-field="median_gp_per_xp"><button type="button" data-table="skills" data-key="median_gp_per_xp">Typical gp/XP</button></th>
+            <th data-field="now_gp_per_xp"><button type="button" data-table="skills" data-key="now_gp_per_xp">Now gp/XP</button></th>
+            <th data-field="now_percentile"><button type="button" data-table="skills" data-key="now_percentile">Past days cheaper</button></th>
+            <th data-field="cost_10m_cheapest"><button type="button" data-table="skills" data-key="cost_10m_cheapest">Goal cost, cheapest month</button></th>
+            <th data-field="cost_10m_median"><button type="button" data-table="skills" data-key="cost_10m_median">Typical month</button></th>
+            <th data-field="cost_10m_dearest"><button type="button" data-table="skills" data-key="cost_10m_dearest">Dearest month</button></th>
+          </tr></thead>
+          <tbody data-draw="skills-rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="gx-section" id="tricks">
+    <h2>Buying tricks are worth a percent or two</h2>
+    <p>Buying supplies on the cheapest day of the week instead of the dearest saves at most <b data-draw="val" data-source="timing" data-field="max_weekday_swing" data-row="0" data-fmt="pct1">—</b>, picking the cheapest hour of the day at most <b data-draw="val" data-source="timing" data-field="max_hour_swing" data-row="0" data-fmt="pct1">—</b>, and trading at the middle price instead of instantly at most <b data-draw="val" data-source="timing" data-field="max_patient_saving" data-row="0" data-fmt="pct1">—</b> of what you spend. Real, but small next to the month-to-month swings above. Where there is a pattern, supplies tend to be cheapest at the weekend and dearest on update days.</p>
+    <div class="gx-card">
+      <h3>Timing and patience, by training method</h3>
+      <p class="gx-note">Swings are the gap between the cheapest and dearest day of the week, or hour of the day, as a share of the input price.</p>
+      <div class="gx-table-wrap">
+        <table data-source="methods" data-row-key="method" id="methods-table">
+          <thead><tr>
+            <th class="l" data-field="method"><button type="button" data-table="methods" data-key="method">Method</button></th>
+            <th class="l" data-field="skill"><button type="button" data-table="methods" data-key="skill">Skill</button></th>
+            <th data-field="now_gp_per_xp"><button type="button" data-table="methods" data-key="now_gp_per_xp">Now gp/XP</button></th>
+            <th class="l" data-field="cheapest_day"><button type="button" data-table="methods" data-key="cheapest_day">Cheapest day</button></th>
+            <th data-field="weekday_swing"><button type="button" data-table="methods" data-key="weekday_swing">Weekday swing</button></th>
+            <th data-field="hour_swing"><button type="button" data-table="methods" data-key="hour_swing">Hour-of-day swing</button></th>
+            <th data-field="patient_saving"><button type="button" data-table="methods" data-key="patient_saving">Patient saving</button></th>
+          </tr></thead>
+          <tbody data-draw="methods-rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <details id="method">
+    <summary>How this was worked out</summary>
+    <dl>
+      <dt>Prices</dt><dd>The OSRS Wiki real-time price API's hourly averages for every item since its history begins on <span data-draw="val" data-source="study" data-field="first_hour" data-row="0" data-fmt="date">—</span>. The average instant-buy price is "high" and the average instant-sell price is "low". Gaps of up to <span data-draw="const" data-key="fill_hours">—</span> are filled from the last hour with trades.</dd>
+      <dt>Margin</dt><dd>What the outputs sell for after GE tax, minus what the inputs cost, per action. Charts and half-lives use the middle of high and low; "hours profitable" buys inputs at the higher price and sells outputs at the lower one, as if trading instantly. Blast Furnace chains include the coffer fee spread over the Wiki guide's bars per hour; tanning includes the tanner's fee.</dd>
+      <dt>GE tax</dt><dd>Applied at the rate in force each hour: none before the tax began in <span data-draw="const" data-key="tax_start">—</span>, then the original rate, then the higher rate from <span data-draw="const" data-key="tax_up">—</span>, per item, rounded down and capped.</dd>
+      <dt>Unusually wide</dt><dd>An hour when the margin enters its widest <span data-draw="const" data-key="top_share">—</span> compared with the previous <span data-draw="const" data-key="norm_days">—</span> (using only past data), after at least <span data-draw="const" data-key="gap_hours">—</span> outside it. "Left" is the margin's gap above its median over the previous <span data-draw="const" data-key="norm_days">—</span> at a later hour, as a share of the gap when it started, averaged over every such episode.</dd>
+      <dt>Returns to a level</dt><dd>An augmented Dickey–Fuller test on the daily margin. Most chains pass; Blast Furnace bars, ranarr unfinished potions, Saradomin brews and black d'hide bodies wander instead.</dd>
+      <dt>Moves first</dt><dd>Granger tests on daily price changes in both directions, plus how much of a move in one side the other catches up within a week. "Loosely linked" chains include the Blast Furnace bars, whose ore and bar prices tend to move in opposite directions on the same day, probably because processors buy ore and sell bars at once.</dd>
+      <dt>Price of XP</dt><dd>Gold lost per XP buying inputs and selling outputs instantly. A skill's price on a day is its cheapest listed method that day; methods differ in speed. Prayer uses bones at a gilded altar; Construction oak larders and mahogany tables; Firemaking yew, magic and redwood logs.</dd>
+      <dt>Left out</dt><dd>Burn and failure rates, travel, your levels and boosts, and how far a large order moves the price. Prices are in nominal gold, not adjusted for inflation. Past patterns can change with game updates.</dd>
+    </dl>
+  </details>
+</div>
+
+<script>
+  // ---------- calcs: values worked out from the data files
+  dash.calc('summary', {
+    inputs: ['chains'], title: 'Chain summary',
+    description: 'Counts and medians across the processing chains.',
+    fn: (chains) => {
+      const num = (v) => (v === '' || v == null ? null : Number(v));
+      const median = (a) => { const s = a.filter((v) => v != null).sort((x, y) => x - y), n = s.length;
+        return n ? (n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2) : null; };
+      const profitable = chains.filter((r) => r.profitable === 'yes');
+      return [{
+        chains: chains.length,
+        profitable: profitable.length,
+        median_hours_profitable: median(profitable.map((r) => num(r.hours_profitable))),
+        typical_losing_spell_h: median(profitable.map((r) => num(r.typical_losing_spell_h))),
+        median_half_life_h: median(chains.map((r) => num(r.half_life_h) ?? Infinity)),
+        wider_in_2026: profitable.filter((r) => num(r.margin_2026_gp) > num(r.margin_2024_gp)).length,
+      }];
+    },
+  });
+
+  dash.calc('decay_median', {
+    inputs: ['decay'], title: 'Median decay across chains',
+    description: 'For each number of hours, the median share of the extra margin left across all chains.',
+    fn: (decay) => {
+      const byHour = {};
+      decay.forEach((r) => { (byHour[r.hours] = byHour[r.hours] || []).push(Number(r.left)); });
+      return Object.keys(byHour).map(Number).sort((a, b) => a - b).map((hours) => {
+        const s = byHour[hours].sort((a, b) => a - b), n = s.length;
+        return { hours, left: n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2 };
+      });
+    },
+  });
+
+  dash.calc('timing', {
+    inputs: ['methods'], title: 'Largest timing savings',
+    description: 'The largest weekday, hour-of-day and patience savings across the training methods.',
+    fn: (methods) => [{
+      max_weekday_swing: Math.max(...methods.map((r) => Number(r.weekday_swing))),
+      max_hour_swing: Math.max(...methods.map((r) => Number(r.hour_swing))),
+      max_patient_saving: Math.max(...methods.map((r) => Number(r.patient_saving))),
+    }],
+  });
+
+  // ---------- formatting
+  const fmtInt = d3.format(',');
+  const fmtGp = (v) => d3.format(',')(Math.round(v));
+  const fmtPct1 = d3.format('.1%');
+  const fmtPct0 = d3.format('.0%');
+  const fmtCompact = (v) => new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(v);
+  const fmtDate = (s) => d3.utcFormat('%b %-d, %Y')(new Date(s));
+  const fmt2 = d3.format(',.2f');
+  const num = (v) => (v === '' || v == null ? null : Number(v));
+  const FORMATS = {
+    int: (v) => fmtInt(Math.round(Number(v))), num1: (v) => d3.format(',.1~f')(Number(v)), pct1: (v) => fmtPct1(Number(v)), pct0: (v) => fmtPct0(Number(v)),
+    compact: (v) => fmtCompact(Number(v)), date: (v) => fmtDate(v),
+  };
+
+  const rowsOf = (id) => { const d = dash.data(id); return d.status === 'ok' && Array.isArray(d.data) ? d.data : null; };
+  const failLine = (el, ...ids) => {
+    const failed = ids.some((id) => ['error', 'connect', 'declined', 'missing'].includes(dash.data(id).status));
+    if (failed) { el.classList.remove('dash-skeleton'); el.replaceChildren(Object.assign(document.createElement('div'), { className: 'gx-fail', textContent: 'Failed to load' })); }
+    return failed;
+  };
+
+  // ---------- one number inside a sentence
+  dash.draw('val', (el) => {
+    const rows = rowsOf(el.dataset.source);
+    if (!rows) { el.textContent = '—'; return; }
+    let row = null;
+    if (el.dataset.where) {
+      const conds = el.dataset.where.split('&').map((p) => p.split('=').map(decodeURIComponent));
+      row = rows.find((r) => conds.every(([k, v]) => String(r[k]) === v));
+    } else row = rows[Number(el.dataset.row || 0)];
+    const v = row ? row[el.dataset.field] : null;
+    el.textContent = v == null || v === '' ? '—' : (FORMATS[el.dataset.fmt] || String)(v);
+  });
+
+  // Fixed settings of the study (chosen when it was run), drawn wherever the text names them.
+  const STUDY = { norm_days: '30 days', top_share: '10%', gap_hours: '6 hours', fill_hours: '3 hours', now_days: '7 days',
+    goal_xp: '10M XP', tax_start: 'December 2021', tax_up: 'May 2025' };
+  dash.draw('const', (el) => { el.textContent = STUDY[el.dataset.key] ?? '—'; });
+
+  dash.draw('accent-swatch', (el) => { el.style.background = dash.colors[0]; });
+
+  // ---------- sortable tables
+  const sortState = { chains: { key: 'hours_profitable', desc: true }, skills: { key: 'median_gp_per_xp', desc: true },
+    methods: { key: 'weekday_swing', desc: true } };
+  const BLANK_AS = { half_life_h: Infinity };  // a blank half-life means longer than the study's horizon
+  const sortRows = (rows, { key, desc }) => [...rows].sort((a, b) => {
+    const val = (r) => (r[key] === '' || r[key] == null ? (key in BLANK_AS ? BLANK_AS[key] : null) : r[key]);
+    const va = val(a), vb = val(b);
+    if (va == null || vb == null) return va == null && vb == null ? 0 : (va == null ? 1 : -1);  // blanks last
+    const x = Number(va), y = Number(vb);
+    const c = !Number.isNaN(x) && !Number.isNaN(y) ? (x === y ? 0 : x < y ? -1 : 1) : String(va).localeCompare(String(vb));
+    return desc ? -c : c;
+  });
+  const setSortAria = () => {
+    document.querySelectorAll('.gx th button[data-table]').forEach((btn) => {
+      const s = sortState[btn.dataset.table];
+      btn.parentElement.setAttribute('aria-sort', s.key === btn.dataset.key ? (s.desc ? 'descending' : 'ascending') : 'none');
+    });
+  };
+  document.querySelectorAll('.gx th button[data-table]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const s = sortState[btn.dataset.table];
+      if (s.key === btn.dataset.key) s.desc = !s.desc; else { s.key = btn.dataset.key; s.desc = true; }
+      setSortAria();
+      dash.draw(btn.dataset.table + '-rows');
+    });
+  });
+  setSortAria();
+
+  const fillTable = (tbody, rows, cols) => {
+    tbody.replaceChildren(...rows.map((r) => {
+      const tr = document.createElement('tr');
+      cols.forEach(([field, f, cls]) => {
+        const td = document.createElement('td');
+        const v = r[field];
+        td.textContent = f ? f(v, r) : String(v);
+        const c = typeof cls === 'function' ? cls(v, r) : cls;
+        if (c) td.className = c;
+        tr.append(td);
+      });
+      return tr;
+    }));
+  };
+  const orBlank = (f) => (v) => (v === '' || v == null ? '' : f(Number(v)));
+  const signClass = (good) => (v) => { const n = Number(v); return n === 0 || Number.isNaN(n) ? '' : ((n > 0) === good ? 'good' : 'bad'); };
+
+  dash.draw('chains-rows', (tbody) => {
+    const rows = rowsOf('chains');
+    if (!rows) { tbody.replaceChildren(); return; }
+    fillTable(tbody, sortRows(rows, sortState.chains), [
+      ['chain', null, 'l'], ['skill', null, 'l'],
+      ['hours_profitable', (v) => fmtPct1(Number(v))],
+      ['longest_losing_spell_h', orBlank(fmtGp)],
+      ['half_life_h', (v) => (v === '' || v == null ? 'over a week' : fmtGp(Number(v)))],
+      ['margin_2024_gp', (v) => fmtGp(Number(v)), signClass(true)],
+      ['margin_2026_gp', (v) => fmtGp(Number(v)), signClass(true)],
+      ['moves_first', null, 'l'],
+    ]);
+  });
+
+  dash.draw('skills-rows', (tbody) => {
+    const rows = rowsOf('xp_skills');
+    if (!rows) { tbody.replaceChildren(); return; }
+    fillTable(tbody, sortRows(rows, sortState.skills), [
+      ['skill', null, 'l'], ['usual_method', null, 'l'],
+      ['median_gp_per_xp', (v) => fmt2(Number(v))], ['now_gp_per_xp', (v) => fmt2(Number(v))],
+      ['now_percentile', (v) => fmtPct0(Number(v))],
+      ['cost_10m_cheapest', (v) => fmtCompact(Number(v))], ['cost_10m_median', (v) => fmtCompact(Number(v))],
+      ['cost_10m_dearest', (v) => fmtCompact(Number(v))],
+    ]);
+  });
+
+  dash.draw('methods-rows', (tbody) => {
+    const rows = rowsOf('methods');
+    if (!rows) { tbody.replaceChildren(); return; }
+    fillTable(tbody, sortRows(rows, sortState.methods), [
+      ['method', null, 'l'], ['skill', null, 'l'], ['now_gp_per_xp', (v) => fmt2(Number(v))],
+      ['cheapest_day', null, 'l'], ['weekday_swing', (v) => fmtPct1(Number(v))],
+      ['hour_swing', (v) => fmtPct1(Number(v))], ['patient_saving', (v) => fmtPct1(Number(v))],
+    ]);
+  });
+
+  // ---------- chart helpers
+  const tipFor = (box) => { const t = document.createElement('div'); t.className = 'gx-tip'; t.hidden = true; box.append(t); return t; };
+  const placeTip = (box, tip, x, y) => {
+    tip.hidden = false;
+    const bw = box.clientWidth, tw = tip.offsetWidth, th = tip.offsetHeight;
+    let left = x + 12; if (left + tw > bw) left = Math.max(0, x - tw - 12);
+    tip.style.left = left + 'px'; tip.style.top = Math.max(0, y - th - 8) + 'px';
+  };
+  const tipLine = (tip, parts) => {
+    tip.replaceChildren(...parts.map(([text, cls, color]) => {
+      const d = document.createElement('div');
+      if (color) { const s = document.createElement('i'); s.className = 'gx-sw'; s.style.background = color; s.style.marginRight = '6px'; d.append(s); }
+      d.append(text); if (cls) d.className = cls; return d;
+    }));
+  };
+  const styleAxis = (g) => {
+    g.attr('font-size', null).attr('font-family', null);
+    g.selectAll('text').style('fill', 'var(--color-fg-muted)').style('font-size', 'var(--cds-font-size-caption)');
+    g.selectAll('.domain').style('stroke', 'var(--cds-chart-axis)');
+    g.selectAll('.tick line').style('stroke', 'var(--cds-chart-grid)');
+  };
+  const widestText = (svg, labels) => {
+    const t = svg.append('text').style('font-size', 'var(--cds-font-size-caption)');
+    const w = d3.max(labels, (s) => { t.text(s); return t.node().getComputedTextLength(); }) || 0;
+    t.remove(); return w;
+  };
+
+  // ---------- decay chart
+  dash.draw('decay-chart', (el) => {
+    const rows = rowsOf('decay'), med = rowsOf('decay_median');
+    if (failLine(el, 'decay', 'decay_median')) return;
+    if (!rows || !med) { el.replaceChildren(); el.classList.add('dash-skeleton'); return; }
+    el.classList.remove('dash-skeleton');
+    el.replaceChildren();
+    const W = el.clientWidth || 600, H = 300;
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
+      .attr('aria-label', 'Share of an unusually wide margin left by hours since it appeared, per chain and median');
+    const yMax = Math.max(1.05, d3.max(rows, (r) => Number(r.left)));
+    const ml = widestText(svg, ['100%']) + 12, mr = 70, mt = 10, mb = 28;
+    const x = d3.scaleLinear([0, 168], [ml, W - mr]);
+    const y = d3.scaleLinear([0, yMax], [H - mb, mt]);
+    const days = [0, 24, 48, 72, 96, 120, 144, 168];
+    svg.append('g').attr('transform', `translate(0,${H - mb})`)
+      .call(d3.axisBottom(x).tickValues(W < 480 ? [0, 48, 96, 168] : days).tickFormat((h) => (h === 0 ? '0' : h < 24 ? `${h}h` : `${h / 24}d`)).tickSizeOuter(0))
+      .call(styleAxis);
+    svg.append('g').attr('transform', `translate(${ml},0)`)
+      .call(d3.axisLeft(y).ticks(5).tickFormat(d3.format('.0%')).tickSize(-(W - ml - mr)))
+      .call(styleAxis).call((g) => g.select('.domain').remove());
+    svg.append('line').attr('x1', ml).attr('x2', W - mr).attr('y1', y(0.5)).attr('y2', y(0.5))
+      .style('stroke', 'var(--cds-chart-reference)').style('stroke-dasharray', '4 4');
+    svg.append('text').attr('x', W - mr + 6).attr('y', y(0.5) + 4).text('half gone')
+      .style('fill', 'var(--color-fg-muted)').style('font-size', 'var(--cds-font-size-caption)');
+    const line = d3.line().x((d) => x(d.h)).y((d) => y(d.v));
+    const byChain = d3.groups(rows, (r) => r.chain).map(([chain, rs]) => ({ chain,
+      pts: rs.map((r) => ({ h: Number(r.hours), v: Number(r.left) })).sort((a, b) => a.h - b.h) }));
+    svg.append('g').selectAll('path').data(byChain).join('path').attr('d', (d) => line(d.pts)).attr('fill', 'none')
+      .style('stroke', 'var(--cds-chart-muted)').attr('stroke-width', 1.25).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round');
+    const mpts = med.map((r) => ({ h: Number(r.hours), v: Number(r.left) }));
+    svg.append('path').attr('d', line(mpts)).attr('fill', 'none').style('stroke', dash.colors[0]).attr('stroke-width', 2.5)
+      .attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round');
+    const last = mpts[mpts.length - 1];
+    svg.append('circle').attr('cx', x(last.h)).attr('cy', y(last.v)).attr('r', 4).style('fill', dash.colors[0]);
+    svg.append('text').attr('x', x(last.h) + 8).attr('y', y(last.v) + 4).text(fmtPct0(last.v))
+      .style('fill', 'var(--color-fg)').style('font-size', 'var(--cds-font-size-caption)');
+    const tip = tipFor(el);
+    const rule = svg.append('line').attr('y1', mt).attr('y2', H - mb).style('stroke', 'var(--cds-chart-axis)').attr('opacity', 0);
+    const dot = svg.append('circle').attr('r', 4).style('fill', dash.colors[0]).attr('opacity', 0);
+    const hours = mpts.map((p) => p.h);
+    svg.append('rect').attr('x', ml).attr('y', mt).attr('width', W - ml - mr).attr('height', H - mt - mb).attr('fill', 'transparent')
+      .on('pointermove', (ev) => {
+        const [px] = d3.pointer(ev);
+        const h = hours.reduce((a, b) => (Math.abs(x(b) - px) < Math.abs(x(a) - px) ? b : a));
+        const m = mpts.find((p) => p.h === h);
+        const at = byChain.map((c) => ({ chain: c.chain, v: (c.pts.find((p) => p.h === h) || {}).v })).filter((d) => d.v != null)
+          .sort((a, b) => a.v - b.v);
+        rule.attr('x1', x(h)).attr('x2', x(h)).attr('opacity', 1);
+        dot.attr('cx', x(h)).attr('cy', y(m.v)).attr('opacity', 1);
+        tipLine(tip, [[h === 0 ? 'When it appears' : `After ${h < 24 ? h + ' hours' : (h / 24) + (h === 24 ? ' day' : ' days')}`, 't'],
+          [`Median: ${fmtPct0(m.v)} left`, null, dash.colors[0]],
+          [`Fastest: ${at[0].chain} ${fmtPct0(at[0].v)}`], [`Slowest: ${at[at.length - 1].chain} ${fmtPct0(at[at.length - 1].v)}`]]);
+        placeTip(el, tip, x(h), y(m.v));
+      })
+      .on('pointerleave', () => { tip.hidden = true; rule.attr('opacity', 0); dot.attr('opacity', 0); });
+  });
+
+  // ---------- dumbbell: 2024 vs 2026 margin per profitable chain
+  dash.draw('dumbbell-chart', (el) => {
+    const rows = rowsOf('chains');
+    if (failLine(el, 'chains')) return;
+    if (!rows) { el.replaceChildren(); el.classList.add('dash-skeleton'); return; }
+    el.classList.remove('dash-skeleton');
+    el.replaceChildren();
+    const data = rows.filter((r) => r.profitable === 'yes')
+      .map((r) => ({ chain: r.chain, a: Number(r.margin_2024_gp), b: Number(r.margin_2026_gp) }))
+      .sort((p, q) => q.b - p.b);
+    const W = el.clientWidth || 600, rowH = 24, mt = 8, mb = 28, H = mt + mb + data.length * rowH;
+    el.style.minHeight = H + 'px';
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
+      .attr('aria-label', 'Typical margin per action in 2024 and 2026 for each profitable chain');
+    const narrow = W < 520;
+    const ml = Math.min(widestText(svg, data.map((d) => d.chain)) + 12, narrow ? W * 0.45 : 260), mr = 56;
+    const x = d3.scaleLinear([Math.min(0, d3.min(data, (d) => Math.min(d.a, d.b))), d3.max(data, (d) => Math.max(d.a, d.b))], [ml, W - mr]).nice();
+    const y = d3.scaleBand(data.map((d) => d.chain), [mt, H - mb]).padding(0.3);
+    svg.append('g').attr('transform', `translate(0,${H - mb})`)
+      .call(d3.axisBottom(x).ticks(narrow ? 4 : 7).tickFormat(d3.format(',')).tickSize(-(H - mt - mb)))
+      .call(styleAxis).call((g) => g.select('.domain').remove());
+    svg.append('g').selectAll('text').data(data).join('text').attr('x', ml - 10).attr('y', (d) => y(d.chain) + y.bandwidth() / 2 + 4)
+      .attr('text-anchor', 'end').text((d) => d.chain).style('fill', 'var(--color-fg)').style('font-size', 'var(--cds-font-size-caption)');
+    const g = svg.append('g').selectAll('g').data(data).join('g');
+    g.append('line').attr('x1', (d) => x(d.a)).attr('x2', (d) => x(d.b)).attr('y1', (d) => y(d.chain) + y.bandwidth() / 2)
+      .attr('y2', (d) => y(d.chain) + y.bandwidth() / 2).style('stroke', 'var(--cds-chart-muted)').attr('stroke-width', 2);
+    g.append('circle').attr('cx', (d) => x(d.a)).attr('cy', (d) => y(d.chain) + y.bandwidth() / 2).attr('r', 4.5)
+      .style('fill', 'var(--cds-chart-muted)').style('stroke', 'var(--color-panel)').attr('stroke-width', 2);
+    g.append('circle').attr('cx', (d) => x(d.b)).attr('cy', (d) => y(d.chain) + y.bandwidth() / 2).attr('r', 5)
+      .style('fill', dash.colors[0]).style('stroke', 'var(--color-panel)').attr('stroke-width', 2);
+    g.append('text').attr('x', (d) => x(Math.max(d.a, d.b)) + 9).attr('y', (d) => y(d.chain) + y.bandwidth() / 2 + 4)
+      .text((d) => fmtGp(d.b)).style('fill', 'var(--color-fg-muted)').style('font-size', 'var(--cds-font-size-caption)');
+    const tip = tipFor(el);
+    g.append('rect').attr('x', 0).attr('width', W).attr('y', (d) => y(d.chain) - y.step() * y.paddingInner() / 2)
+      .attr('height', y.step()).attr('fill', 'transparent')
+      .on('pointermove', (ev, d) => {
+        const [px, py] = d3.pointer(ev, el);
+        const ch = d.a !== 0 ? (d.b - d.a) / Math.abs(d.a) : null;
+        tipLine(tip, [[d.chain, 't'], [`2024: ${fmtGp(d.a)} gp`, null, 'var(--cds-chart-muted)'], [`2026: ${fmtGp(d.b)} gp`, null, dash.colors[0]],
+          ...(ch == null ? [] : [[`Change: ${ch > 0 ? '+' : ''}${fmtPct0(ch)}`]])]);
+        placeTip(el, tip, px, py);
+      })
+      .on('pointerleave', () => { tip.hidden = true; });
+  });
+
+  // ---------- small multiples: weekly gp/XP per skill
+  dash.draw('multiples-chart', (el) => {
+    const rows = rowsOf('xp_weekly');
+    if (failLine(el, 'xp_weekly')) return;
+    if (!rows) { el.replaceChildren(); el.classList.add('dash-skeleton'); return; }
+    el.classList.remove('dash-skeleton');
+    el.replaceChildren();
+    const parsed = rows.map((r) => ({ week: new Date(r.week), skill: r.skill, v: Number(r.gp_per_xp) }));
+    const groups = d3.groups(parsed, (d) => d.skill).map(([skill, pts]) => ({ skill, pts: pts.sort((a, b) => a.week - b.week),
+      med: d3.median(pts, (p) => p.v) })).sort((a, b) => b.med - a.med);
+    const grid = document.createElement('div'); grid.className = 'gx-grid'; el.append(grid);
+    const xDomain = d3.extent(parsed, (d) => d.week);
+    groups.forEach((gr) => {
+      const panel = document.createElement('div'); panel.className = 'gx-panel';
+      const name = document.createElement('div'); name.className = 'name'; name.textContent = gr.skill; panel.append(name);
+      const box = document.createElement('div'); box.className = 'gx-chart'; panel.append(box); grid.append(panel);
+      const W = box.clientWidth || 260, H = 130, mt = 8, mb = 22;
+      const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img')
+        .attr('aria-label', `${gr.skill}: gold per XP by week`);
+      const [lo, hi] = d3.extent(gr.pts, (p) => p.v);
+      const y = d3.scaleLinear([Math.min(0, lo), Math.max(0, hi)], [H - mb, mt]).nice(4);
+      const ml = widestText(svg, y.ticks(4).map((t) => d3.format(',')(t))) + 10, mr = 40;
+      const x = d3.scaleUtc(xDomain, [ml, W - mr]);
+      svg.append('g').attr('transform', `translate(0,${H - mb})`)
+        .call(d3.axisBottom(x).ticks(d3.utcYear.every(W < 300 ? 2 : 1)).tickFormat(d3.utcFormat("'%y")).tickSizeOuter(0)).call(styleAxis);
+      svg.append('g').attr('transform', `translate(${ml},0)`).call(d3.axisLeft(y).ticks(4).tickFormat(d3.format(',')).tickSize(-(W - ml - mr)))
+        .call(styleAxis).call((g) => g.select('.domain').remove());
+      svg.append('line').attr('x1', ml).attr('x2', W - mr).attr('y1', y(0)).attr('y2', y(0))
+        .style('stroke', 'var(--cds-chart-reference)').style('stroke-dasharray', '3 3');
+      svg.append('path').attr('d', d3.line().x((p) => x(p.week)).y((p) => y(p.v))(gr.pts)).attr('fill', 'none')
+        .style('stroke', dash.colors[0]).attr('stroke-width', 1.5).attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round');
+      const last = gr.pts[gr.pts.length - 1];
+      svg.append('circle').attr('cx', x(last.week)).attr('cy', y(last.v)).attr('r', 3.5).style('fill', dash.colors[0])
+        .style('stroke', 'var(--color-panel)').attr('stroke-width', 1.5);
+      svg.append('text').attr('x', x(last.week) + 6).attr('y', y(last.v) + 4).text(fmt2(last.v))
+        .style('fill', 'var(--color-fg)').style('font-size', 'var(--cds-font-size-caption)');
+      const tip = tipFor(box);
+      const dot = svg.append('circle').attr('r', 3.5).style('fill', dash.colors[0]).attr('opacity', 0);
+      const bis = d3.bisector((p) => p.week).center;
+      svg.append('rect').attr('x', ml).attr('y', mt).attr('width', W - ml - mr).attr('height', H - mt - mb).attr('fill', 'transparent')
+        .on('pointermove', (ev) => {
+          const [px] = d3.pointer(ev);
+          const p = gr.pts[bis(gr.pts, x.invert(px))];
+          dot.attr('cx', x(p.week)).attr('cy', y(p.v)).attr('opacity', 1);
+          tipLine(tip, [[`Week of ${d3.utcFormat('%b %-d, %Y')(p.week)}`, 't'], [`${fmt2(p.v)} gp per XP`]]);
+          placeTip(box, tip, x(p.week), y(p.v));
+        })
+        .on('pointerleave', () => { tip.hidden = true; dot.attr('opacity', 0); });
+    });
+  });
+</script>

@@ -1,0 +1,58 @@
+# Price history findings (first pass)
+
+Data: 49,548 hourly snapshots (2021-03-08 to 2026-11-07), 67 items, 22 processing
+chains, 21 training methods. Code and method: [research/](../research/README.md).
+Interactive version: the "GE price history findings" dashboard on claude.ai.
+
+## Processing margins
+
+- **They're a wage, not a trade.** 16 of 22 chains make money trading instantly;
+  those were profitable in a median 99.2% of hours. Losing spells typically last
+  1–2 hours.
+- **Unusually wide margins fade within about a day.** After a margin enters its
+  top 10% versus the past 30 days, half of the extra is gone in a median ~22 hours,
+  most of it within a week. Slow exceptions (wide margins persist for days):
+  Blast Furnace bars, cannonballs, sharks, karambwans, Saradomin brews, black d'hide.
+- **Most margins return to a level** (ADF p < 0.05 for 16 of 22). Blast Furnace
+  runite, adamantite and steel bars, ranarr unfinished potions, Saradomin brews and
+  black d'hide wander.
+- **Margins are wider now than in 2024** for 15 of 16 profitable chains, despite the
+  tax going to 2% in May 2025. BF runite: 531 → 1,110 gp/bar, because runite ore fell
+  ~8% (11,133 → 10,224) while bars held at ~12,270.
+- **The product usually moves first.** For potions, cooked fish, bows and darts,
+  raw-material prices follow the product's price within days (e.g. raw manta rays
+  catch up ~93% of a cooked-manta move within a week). Gem → bolt tips is the
+  reverse (the gem moves first). BF ore and bar prices move in opposite directions
+  day to day (corr ≈ −0.25), likely processors buying ore and selling bars at once.
+- Short-window before/after estimates of the tax changes were too noisy to read;
+  the year-over-year comparison above is more robust but not causal.
+
+## Price of XP (cheapest standard method; gp lost per XP)
+
+| Skill | Typical | Now (Nov 2026) | Past days cheaper than now | 10M XP: cheapest / typical / dearest month |
+|---|---|---|---|---|
+| Prayer (dragon bones, gilded) | 10.2 | 14.1 | 86% | 56m / 102m / 166m |
+| Construction (oak larders) | 7.5 | 8.0 | 68% | 62m / 75m / 101m |
+| Herblore (prayer potions) | 2.3 | −0.1 | 8% | −6m / 23m / 66m |
+| Crafting (green d'hide / battlestaves) | 2.2 | 3.6 | 78% | −2m / 23m / 70m |
+| Firemaking (yew / redwood logs) | 1.0 | 0.4 | 0% | 4m / 10m / 15m |
+| Smithing (adamant platebodies) | 0.5 | −1.2 | 9% | −20m / 5m / 26m |
+| Fletching (magic longbows) | −0.8 | −1.2 | 17% | −15m / −8m / −4m |
+| Cooking (sharks) | −1.0 | −1.2 | 14% | −14m / −10m / −6m |
+
+- **Timing is worth a lot:** the same 10M XP cost up to 3× more in the dearest month
+  than the cheapest (Prayer), and swings of 50–70m for Herblore and Crafting.
+- **Right now** Firemaking, Herblore and Smithing XP are near historic lows; Prayer
+  and Crafting are expensive.
+- Dragon bones roughly tripled from May 2021 (~1,370) to Sept 2024 (~4,200).
+- **Buying tricks are small:** cheapest vs dearest weekday ≤ 1.5% (supplies usually
+  cheapest at the weekend, dearest Wednesday–Thursday), hour of day ≤ 1.6%, trading at
+  the mid price instead of instantly ≤ 2% of spend.
+
+## Ideas this supports
+
+- Advisor: flag when a method ranks high only because its margin is unusually wide
+  (expect half of the extra gone by tomorrow).
+- Advisor: per skill, show today's XP price against its history ("cheap now / dear now").
+- Next studies: Magic (alching), Runecraft; stockpiling across buy-limit windows;
+  price impact of large orders; a long-run inflation adjustment.
