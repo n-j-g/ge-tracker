@@ -2,6 +2,8 @@
 
 bankstand profitably
 
+**Live page (updated hourly): https://n-j-g.github.io/ge-tracker/**
+
 Finds the OSRS skilling/production methods you can do by buying inputs and
 selling outputs on the Grand Exchange, and ranks them by feasible gp/hr, XP/hr,
 gp/xp and how they compare with your normal way of training each skill.
