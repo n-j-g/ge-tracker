@@ -44,6 +44,17 @@ page and publishes it with GitHub Pages. It also runs on every push to `main`
 and on demand from the Actions tab. Pages must be enabled once under
 Settings → Pages → Source: GitHub Actions (free for public repositories).
 
+## Research: price history
+
+`research/backfill_history.py` downloads the API's full hourly history (every
+item, from early 2021) into `data/history/prices_1h.sqlite` (~4 GB): one
+request per hour of history, at most one per second, newest first, resumable.
+
+```
+caffeinate -i python3 research/backfill_history.py   # run/resume (keeps a Mac awake)
+python3 research/backfill_history.py --status        # what's stored so far
+```
+
 ## Model
 
 A recipe is `n_1·item_1 + … + n_k·item_k → m_1·out_1 + … + m_j·out_j`, plus XP.
