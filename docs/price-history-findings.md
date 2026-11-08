@@ -86,8 +86,15 @@ normal value, excluding each item's first 30 days on the GE (launch prices).
   2022, ~130b a year since 2024). The median episode moves ~115m gp; 87% last a single hour.
 - **They favour worthless, low-dose potions and junk**: Defence potion(1)/(2), divine
   potions, barbarian mixes, Guthix rest(1), Relicym's balm, swamp weed, Blamish shells.
-  The same items recur for years (87 items have 10+ episodes), but in 2026 the
-  transferrers rotate items faster.
+  The same items recur for years (87 items have 10+ episodes); ~80% of episodes are
+  on an item used before, and that share hasn't changed in 2026.
+- **Volume is down, and spread thinner.** Episodes per quarter fell from ~150–280
+  (2021–23) to ~50–150 (2024–26), and Aug–Sep 2026 were the quietest months on record
+  (12–13 episodes). October rebounded (55 episodes, ~46b, mostly poisoned javelins and
+  bolts). In late 2026 only 3–4% of episodes hit last year's 8 busiest items (13–21%
+  before), so they're spread over many familiar items rather than moving to new ones.
+  The data can't separate less real-world trading (bot bans, harsher penalties for
+  gold buyers from Sept 2025) from transfers moving to channels this filter misses.
 - Evenings and nights UTC (peak 19:00–23:00), busiest on Saturdays.
 - **Trap backtest (a ceiling, not a forecast):** each month list the 8 items with the most
   episodes in the past year at half their usual transfer price. If GE price priority
@@ -95,6 +102,11 @@ normal value, excluding each item's first 30 days on the GE (launch prices).
   and caught a median ~320m a month (2022–2026), ~180m a month since 2025, and nothing in
   Aug–Oct 2026. If transferrers abandon an item after one interception, it drops to ~78m
   a month on average (zero in most months).
+- **Timing isn't predictable from 'tests'** (research/transfer_leadup.py, 1,201
+  episodes since Feb 2024). Small high-price prints appear in the 48h before 26% of
+  transfers (13% expected by chance), but only 1% of such prints are followed by a
+  transfer within 48h. Ordinary trading and stocking-up volume before a transfer look
+  normal. These items trade in about a third of all hours, so they aren't dead items.
 - Untested assumptions: that the GE really fills the cheapest resting offer first for
   these trades, and that the transferrer doesn't check for other offers first. Gold
   traced to real-world trading can be removed by Jagex, possibly with the receiving account
