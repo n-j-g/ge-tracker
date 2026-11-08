@@ -50,6 +50,13 @@ jobs:
           mkdir -p site
           python ge_profit.py --html site/index.html > /dev/null
 
+      # Same prices as the page above (saved by that run), so the two pages agree.
+      - name: Build the supply-chain map
+        run: |
+          mkdir -p site/chain
+          cp chain/index.html site/chain/
+          python chain/build_graph.py --offline --out site/chain/graph.json
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

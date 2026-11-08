@@ -44,6 +44,19 @@ page and publishes it with GitHub Pages. It also runs on every push to `main`
 and on demand from the Actions tab. Pages must be enabled once under
 Settings → Pages → Source: GitHub Actions (free for public repositories).
 
+## Supply-chain map
+
+`chain/index.html` shows any item in the middle, the recipes that make it on one
+side and the recipes that use it on the other; click a branch to move along the
+chain. It reads `graph.json`, built by `chain/build_graph.py` from every Wiki recipe
+plus current prices (same profit model as the main page). The hourly job publishes
+it at `/chain/`. To try it locally:
+
+```
+python3 chain/build_graph.py --offline        # after a normal run has saved data/last_*.json
+cd chain && python3 -m http.server             # then open http://localhost:8000
+```
+
 ## Research: price history
 
 `research/backfill_history.py` downloads the API's full hourly history (every

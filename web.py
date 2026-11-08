@@ -134,11 +134,14 @@ TEMPLATE = """<!doctype html>
   button { font: inherit; padding: 3px 12px; color: var(--head-fg); background: var(--head);
            border: 2px solid var(--frame); border-radius: 3px; cursor: pointer; }
   button:disabled { opacity: 0.45; cursor: default; }
+  .navbtn { display: inline-block; padding: 3px 12px; color: var(--head-fg); background: var(--head);
+            border: 2px solid var(--frame); border-radius: 3px; text-decoration: none; }
 </style>
 </head>
 <body>
 <div class="top"><h1>GE production profits</h1>
-<span><button id="font" type="button" title="Switch text font">Aa Mono</button>
+<span><a class="navbtn" href="chain/">Supply chains</a>
+<button id="font" type="button" title="Switch text font">Aa Mono</button>
 <button id="theme" type="button" title="Switch light/dark">☾ Dark</button></span></div>
 <p class="note">__INFO__</p>
 <p class="note">Click GP/hr, XP/hr, GP/action, GP/XP or GP/4h to sort. GP/hr = profit over the next hour: actions are limited by production speed (Wiki ticks + a bank trip per inventory; S), one full buy limit (L) or your market share of an hour's volume (V). Recipes without usable timing data (e.g. runecrafting) show — unless a speed is set in recipes.toml. GP/4h = GP/action × actions per 4-hour buy-limit window, where actions are capped by the inputs' buy limits and by your market share of each item's trading volume (* = volume is the tighter cap). Min vol/hr = trades in the last hour of the recipe's least-traded item; thinly traded items have unreliable prices.</p>

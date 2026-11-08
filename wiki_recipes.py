@@ -84,8 +84,10 @@ def _tools(value) -> tuple[str, ...]:
     return tuple(n for n in names if n and not any(x in n.lower() for x in _NOT_INVENTORY))
 
 
-def convert_row(row: dict) -> Recipe | None:
-    """One Wiki row -> Recipe, or None if it can't be expressed (non-numeric XP etc.)."""
+def convert_row(row: dict, lenient: bool = False) -> Recipe | None:
+    """One Wiki row -> Recipe, or None if it can't be expressed (non-numeric XP etc.).
+    lenient=True keeps recipes whose XP depends on the player (xp=0, xp_varies=True),
+    for uses like the supply-chain map where the connection matters more than the XP."""
     try:
         p = json.loads(row["production_json"])
     except (KeyError, TypeError, ValueError):
@@ -106,15 +108,21 @@ def convert_row(row: dict) -> Recipe | None:
     if not inputs:
         return None
 
-    xp, skills = 0.0, []
+    xp, skills, levels, varies = 0.0, [], [], False
     for s in p.get("skills") or []:
         val = _num(s.get("experience"))
         if val is None:
-            return None  # e.g. "1×Construction level": depends on the player
+            if not lenient:
+                return None  # e.g. "1×Construction level": depends on the player
+            varies, val = True, 0.0
         xp += val
         if s.get("name"):
             name = s["name"].strip()
-            skills.append(name[:1].upper() + name[1:])  # a few rows say "cooking"
+            name = name[:1].upper() + name[1:]  # a few rows say "cooking"
+            skills.append(name)
+            lvl = _num(s.get("level"))
+            if lvl is not None:
+                levels.append((name, int(lvl)))
 
     name = out_name + (f" ({out['subtxt']})" if out.get("subtxt") else "")
     return Recipe(
@@ -128,11 +136,13 @@ def convert_row(row: dict) -> Recipe | None:
         facility=p.get("facilities") or None,
         tools=_tools(p.get("tools")),
         source="wiki",
+        levels=tuple(levels),
+        xp_varies=varies,
     )
 
 
-def convert(rows: list[dict]) -> list[Recipe]:
-    return [r for r in (convert_row(row) for row in rows) if r is not None]
+def convert(rows: list[dict], lenient: bool = False) -> list[Recipe]:
+    return [r for r in (convert_row(row, lenient) for row in rows) if r is not None]
 
 
 if __name__ == "__main__":

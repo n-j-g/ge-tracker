@@ -361,6 +361,28 @@ class TestHourlyFees(unittest.TestCase):
         self.assertEqual((out.actions_per_hour, out.coins_per_hour), (2160, 72000))
 
 
+class TestSupplyChain(unittest.TestCase):
+    def test_levels_and_lenient(self):
+        from wiki_recipes import convert_row
+        row = {"production_json": json.dumps({"materials": [{"quantity": "8", "name": "Oak plank"}],
+               "skills": [{"experience": "1×Construction level", "level": "33", "name": "Construction"}],
+               "output": {"quantity": "1", "name": "Oak larder"}})}
+        self.assertIsNone(convert_row(row))
+        r = convert_row(row, lenient=True)
+        self.assertEqual((r.xp, r.xp_varies, r.levels), (0.0, True, (("Construction", 33),)))
+
+    @unittest.skipUnless(__import__("shutil").which("node"), "needs Node.js to syntax-check the page script")
+    def test_map_script_is_valid_javascript(self):
+        import re, subprocess, tempfile
+        from pathlib import Path
+        page = (Path(__file__).parent / "chain" / "index.html").read_text()
+        script = re.search(r"<script>(.*)</script>", page, re.S).group(1)
+        with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False) as f:
+            f.write(script)
+        result = subprocess.run(["node", "--check", f.name], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+
 class TestRecipeFile(unittest.TestCase):
     def test_shipped_recipes_load(self):
         recipes = load_recipes(DEFAULT_RECIPES)

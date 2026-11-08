@@ -58,6 +58,8 @@ class Recipe:
     source: str = "manual"          # "manual" (recipes.toml) or "wiki"
     actions_per_hour: float | None = None  # hand-set rate; overrides the speed model
     coins_per_hour: float | None = None    # time-based fee (e.g. Blast Furnace coffer)
+    levels: tuple[tuple[str, int], ...] = ()  # (skill, level) requirements, where the Wiki gives them
+    xp_varies: bool = False                # XP depends on the player (e.g. "1x Construction level")
 
     def signature(self) -> tuple:
         """Identifies the same transformation regardless of naming or XP."""
@@ -252,7 +254,8 @@ def merge_recipes(manual: list[Recipe], wiki: list[Recipe]) -> list[Recipe]:
         w = wiki_by_sig.get(r.signature())
         if w is not None and r.ticks is None:
             # Keep the hand-written numbers, but borrow what the Wiki knows about speed.
-            r = replace(r, ticks=w.ticks, tools=w.tools, facility=w.facility, members=w.members)
+            r = replace(r, ticks=w.ticks, tools=w.tools, facility=w.facility, members=w.members,
+                        levels=w.levels)
         merged.append(r)
         seen.add(r.signature())
     for r in wiki:

@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GE Supply Chains</title>
+<style>
+  /* Layout: upstream recipes | the item | downstream recipes, joined by curves.
+     Tokens follow the results page: Wiki parchment (light), in-game stone (dark). */
+  :root { color-scheme: light;
+    --bg: #d8ccb4; --panel: #e2dbc8; --panel-2: #ebe4d3; --fg: #3a2f1e; --muted: #6e5f47;
+    --line: #b8a888; --frame: #94866d; --title: #6b3f1c; --accent: #936039; --focus: #6b3f1c;
+    --pos: #1d6b16; --neg: #a8221a; --flat: #8c7d63; --input: #f3eee2; --chip: #d2c5a8;
+    --font-text: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --font-num: ui-monospace, Menlo, Consolas, monospace;
+    --font-title: Georgia, "Times New Roman", serif; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { color-scheme: dark;
+      --bg: #2b241b; --panel: #3e3529; --panel-2: #463c2f; --fg: #e6d6b0; --muted: #a8977a;
+      --line: #574b3b; --frame: #1e1912; --title: #ff981f; --accent: #ffff00; --focus: #ff981f;
+      --pos: #30d030; --neg: #ff5a4d; --flat: #7d6f5a; --input: #2b241b; --chip: #2b241b; }
+  }
+  :root[data-theme="dark"] { color-scheme: dark;
+    --bg: #2b241b; --panel: #3e3529; --panel-2: #463c2f; --fg: #e6d6b0; --muted: #a8977a;
+    --line: #574b3b; --frame: #1e1912; --title: #ff981f; --accent: #ffff00; --focus: #ff981f;
+    --pos: #30d030; --neg: #ff5a4d; --flat: #7d6f5a; --input: #2b241b; --chip: #2b241b; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--fg); font: 14px/1.45 var(--font-text);
+         padding-block: 20px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px));
+         padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  a { color: inherit; }
+  .wrap { max-width: 1320px; margin-inline: auto; display: grid; gap: 14px; }
+
+  /* top bar */
+  .top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+  .top h1 { font: 700 22px/1.2 var(--font-title); color: var(--title); margin: 0; letter-spacing: .02em; }
+  .top .spacer { flex: 1; }
+  .search { position: relative; flex: 1 1 260px; max-width: 420px; }
+  .search input { width: 100%; font: inherit; color: var(--fg); background: var(--input);
+                  border: 2px solid var(--frame); border-radius: 4px; padding: 6px 10px 6px 32px; }
+  .search::before { content: ""; position: absolute; left: 11px; top: 50%; width: 10px; height: 10px;
+                    border: 2px solid var(--muted); border-radius: 50%; transform: translateY(-62%); }
+  .search::after { content: ""; position: absolute; left: 21px; top: 55%; width: 6px; height: 2px;
+                   background: var(--muted); transform: rotate(45deg); }
+  .suggest { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px;
+             list-style: none; background: var(--panel); border: 2px solid var(--frame); border-radius: 4px;
+             box-shadow: 0 8px 24px rgb(0 0 0 / .25); max-height: 340px; overflow: auto; }
+  .suggest li { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 3px; cursor: pointer; }
+  .suggest li[aria-selected="true"], .suggest li:hover { background: var(--panel-2); }
+  .suggest .count { margin-left: auto; color: var(--muted); font: 12px var(--font-num); }
+  .btn { font: inherit; color: var(--title); background: var(--panel); border: 2px solid var(--frame);
+         border-radius: 4px; padding: 4px 12px; cursor: pointer; text-decoration: none; white-space: nowrap; }
+  .btn:hover { background: var(--panel-2); }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* trail */
+  .trail { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 30px; }
+  .trail .lbl { color: var(--muted); font-size: 12px; margin-right: 2px; }
+  .trail a { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px 2px 4px; border-radius: 999px;
+             background: var(--panel); border: 1px solid var(--line); text-decoration: none; font-size: 12px; }
+  .trail a[aria-current="page"] { border-color: var(--title); color: var(--title); font-weight: 600; }
+  .trail .sep { color: var(--muted); font-size: 11px; }
+
+  /* stage */
+  .stage { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 300px) minmax(0, 1fr);
+           gap: 0 64px; align-items: start; }
+  .links { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .links path { fill: none; stroke-linecap: round; transition: opacity .2s, stroke-width .2s; }
+  .links path.pos { stroke: var(--pos); } .links path.neg { stroke: var(--neg); } .links path.flat { stroke: var(--flat); }
+  .links.dim path:not(.hot) { opacity: .18; }
+  .side { display: grid; gap: 10px; min-width: 0; position: relative; z-index: 1; }
+  .side-head { display: grid; gap: 6px; }
+  .side-head h2 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+  .side-head h2 b { color: var(--fg); font-family: var(--font-num); font-weight: 600; letter-spacing: 0; }
+  .controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .controls select { font: inherit; font-size: 12px; color: var(--fg); background: var(--input);
+                     border: 1px solid var(--frame); border-radius: 3px; padding: 2px 4px; }
+  .chip { font: 12px var(--font-text); color: var(--fg); background: var(--chip); border: 1px solid var(--line);
+          border-radius: 999px; padding: 1px 9px; cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--title); border-color: var(--title); color: var(--bg); }
+  .more { justify-self: start; }
+  .empty { color: var(--muted); font-size: 13px; padding: 14px; border: 1px dashed var(--line); border-radius: 6px; }
+
+  /* recipe cards */
+  .rc { position: relative; background: var(--panel); border: 2px solid var(--frame); border-radius: 6px;
+        padding: 8px 10px; display: grid; gap: 5px; cursor: pointer; min-width: 0;
+        transition: transform .15s ease, box-shadow .15s ease, border-color .15s; }
+  .rc:hover, .rc:focus-visible { transform: translateY(-1px); box-shadow: 0 4px 14px rgb(0 0 0 / .18); border-color: var(--title); }
+  .rc::before { content: ""; position: absolute; top: 8px; bottom: 8px; width: 3px; border-radius: 2px; background: var(--flat); }
+  .side.up .rc::before { right: -2px; } .side.down .rc::before { left: -2px; }
+  .rc.pos::before { background: var(--pos); } .rc.neg::before { background: var(--neg); }
+  .rc-top { display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 11px; color: var(--muted); align-items: baseline; }
+  .rc-top .skill { color: var(--fg); font-weight: 600; }
+  .rc-top .how { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+  .rc-main { display: flex; align-items: center; gap: 8px; min-width: 0; font-weight: 600; }
+  .rc-main .nm { overflow-wrap: anywhere; }
+  .items { display: flex; flex-wrap: wrap; gap: 4px; }
+  .it { display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px 1px 3px; border-radius: 4px;
+        background: var(--panel-2); border: 1px solid var(--line); text-decoration: none; font-size: 12px; max-width: 100%; }
+  .it:hover { border-color: var(--title); }
+  .it .q { font-family: var(--font-num); color: var(--muted); }
+  .it.self { opacity: .65; border-style: dashed; }
+  .rc-with { font-size: 11px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .rc-metrics { display: flex; flex-wrap: wrap; gap: 4px 12px; font: 12px var(--font-num); color: var(--muted); }
+  .rc-metrics .hr { font-weight: 700; }
+  .pos-t { color: var(--pos); } .neg-t { color: var(--neg); }
+  .na { color: var(--muted); font-style: italic; font-family: var(--font-text); }
+
+  /* icons */
+  .ico { position: relative; width: 24px; height: 22px; flex: none; display: inline-grid; place-items: center; }
+  .ico img { position: absolute; inset: 0; margin: auto; max-width: 100%; max-height: 100%; image-rendering: pixelated; opacity: 0; transition: opacity .15s; }
+  .ico.ok img { opacity: 1; } .ico.ok .ph { visibility: hidden; }
+  .ico .ph { width: 18px; height: 18px; border-radius: 4px; background: var(--line); display: grid; place-items: center;
+             font: 700 10px var(--font-text); color: var(--muted); }
+  .ico.lg { width: 72px; height: 64px; }
+  .ico.lg img { width: 100%; height: 100%; object-fit: contain; }
+  .ico.lg .ph { width: 52px; height: 52px; font-size: 20px; border-radius: 10px; }
+
+  /* the item in the middle */
+  .center { position: sticky; top: 16px; align-self: start; z-index: 2; background: var(--panel); border: 3px solid var(--frame);
+            border-radius: 10px; padding: 16px; display: grid; gap: 10px; text-align: center;
+            box-shadow: 0 0 0 1px var(--line) inset, 0 10px 30px rgb(0 0 0 / .18); }
+  .center .ico.lg { justify-self: center; }
+  .center h2 { margin: 0; font: 700 20px/1.2 var(--font-title); color: var(--title); text-wrap: balance; }
+  .badges { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; font-size: 11px; }
+  .badge { padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; text-align: left; margin: 0; }
+  .stats dt { font-size: 11px; color: var(--muted); }
+  .stats dd { margin: 0; font: 600 14px var(--font-num); }
+  .verdicts { display: grid; gap: 8px; text-align: left; }
+  .verdict { border-radius: 6px; padding: 7px 9px; background: var(--panel-2); border: 1px solid var(--line); font-size: 12.5px; }
+  .verdict b { display: block; font-size: 13px; }
+  .verdict.good b { color: var(--pos); } .verdict.bad b { color: var(--neg); }
+  .verdict a { text-decoration: underline; text-decoration-color: var(--line); }
+  .wiki { font-size: 12px; color: var(--muted); }
+  .note { color: var(--muted); font-size: 12px; margin: 0; }
+
+  /* motion */
+  @media (prefers-reduced-motion: no-preference) {
+    .enter-l { animation: in-l .32s ease both; } .enter-r { animation: in-r .32s ease both; }
+    .enter-c { animation: pop .3s ease both; }
+    @keyframes in-l { from { opacity: 0; transform: translateX(-14px); } }
+    @keyframes in-r { from { opacity: 0; transform: translateX(14px); } }
+    @keyframes pop { from { opacity: .4; transform: scale(.96); } }
+    .links path.draw { animation: draw .5s ease both; }
+    @keyframes draw { from { stroke-dashoffset: var(--len); } }
+  }
+
+  /* narrow: inputs above, item, outputs below; no curves */
+  @media (max-width: 900px) {
+    .stage { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+    .stage > .side.up { order: 1; } .stage > .center { order: 2; position: static; } .stage > .side.down { order: 3; }
+    .links { display: none; }
+    .side.up .side-head h2::before { content: "↑ "; } .side.down .side-head h2::before { content: "↓ "; }
+    .rc::before { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>Supply chains</h1>
+    <div class="search" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-owns="suggest">
+      <input id="q" type="search" placeholder="Find an item…" autocomplete="off" aria-autocomplete="list" aria-controls="suggest" aria-label="Find an item">
+      <ul class="suggest" id="suggest" role="listbox" hidden></ul>
+    </div>
+    <span class="spacer"></span>
+    <a class="btn" href="../">Profit table</a>
+    <button class="btn" id="theme" type="button">☾ Dark</button>
+  </div>
+  <nav class="trail" id="trail" aria-label="Items you've visited"></nav>
+  <p class="note" id="status">Loading recipes and prices…</p>
+  <main class="stage" id="stage" hidden>
+    <svg class="links" id="links" aria-hidden="true"></svg>
+    <section class="side up" id="up" aria-label="What it's made from"></section>
+    <article class="center" id="center" aria-live="polite"></article>
+    <section class="side down" id="down" aria-label="What it's used to make"></section>
+  </main>
+  <p class="note" id="foot"></p>
+</div>
+
+<script>
+(() => {
+  // ---------------- theme (remembered; starts from the OS setting)
+  const root = document.documentElement, themeBtn = document.getElementById("theme");
+  let theme = null;
+  try { theme = localStorage.getItem("ge-theme"); } catch (e) {}
+  const applyTheme = () => {
+    const t = theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    root.dataset.theme = t; themeBtn.textContent = t === "dark" ? "☀ Light" : "☾ Dark";
+  };
+  themeBtn.onclick = () => { theme = root.dataset.theme === "dark" ? "light" : "dark";
+    try { localStorage.setItem("ge-theme", theme); } catch (e) {} applyTheme(); };
+  applyTheme();
+
+  // ---------------- helpers
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const nf = new Intl.NumberFormat("en");
+  const gp = (v) => {               // OSRS-style: 950, 12.4k, 1.2m, 3.4b
+    const a = Math.abs(v), s = v < 0 ? "−" : "";
+    if (a >= 1e9) return s + (a / 1e9).toFixed(a >= 1e10 ? 0 : 1).replace(/\.0$/, "") + "b";
+    if (a >= 1e6) return s + (a / 1e6).toFixed(a >= 1e7 ? 0 : 1).replace(/\.0$/, "") + "m";
+    if (a >= 1e4) return s + (a / 1e3).toFixed(a >= 1e5 ? 0 : 1).replace(/\.0$/, "") + "k";
+    return s + nf.format(Math.round(a));
+  };
+  const signed = (v) => (v > 0 ? "+" : "") + gp(v);
+  const qty = (q) => (Number.isInteger(q) ? nf.format(q) : String(+q.toFixed(2)));
+  const slug = (name) => encodeURIComponent(name.replace(/ /g, "_"));
+  const unslug = (s) => decodeURIComponent(s).replace(/_/g, " ");
+  const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let G, ITEMS, RECIPES, madeBy, usedIn, byName;
+  const state = { item: null, trail: [], up: { sort: "gph", skill: null, all: false }, down: { sort: "gph", skill: null, all: false } };
+  const SHOW = 8;
+
+  // icons: the Wiki's own item images; a lettered tile if one is missing
+  const icon = (i, large) => {
+    const box = el("span", "ico" + (large ? " lg" : ""));
+    const it = ITEMS[i];
+    box.append(el("span", "ph", it.n.slice(0, 1)));   // shown until the picture arrives, or if it never does
+    const img = new Image();
+    img.alt = ""; img.loading = "lazy"; img.decoding = "async";
+    img.onload = () => box.classList.add("ok");
+    img.onerror = () => img.remove();
+    img.src = "https://oldschool.runescape.wiki/images/" + encodeURIComponent(it.ic.replace(/ /g, "_"));
+    box.append(img);
+    return box;
+  };
+  const buyP = (it) => (it.b == null && it.s == null ? null : Math.max(it.b ?? -Infinity, it.s ?? -Infinity));
+  const sellP = (it) => (it.b == null && it.s == null ? null : Math.min(it.b ?? Infinity, it.s ?? Infinity));
+  const method = (r) => { const m = r.n.match(/\(([^)]*)\)\s*$/); return m ? m[1] : null; };
+
+  // ---------------- load
+  fetch("graph.json").then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((g) => {
+    G = g; ITEMS = g.items; RECIPES = g.recipes;
+    madeBy = ITEMS.map(() => []); usedIn = ITEMS.map(() => []); byName = new Map();
+    RECIPES.forEach((r, k) => { r.o.forEach(([i]) => madeBy[i].push(k)); r.i.forEach(([i]) => usedIn[i].push(k)); });
+    ITEMS.forEach((it, i) => byName.set(it.n.toLowerCase(), i));
+    $("status").hidden = true; $("stage").hidden = false;
+    const when = new Date(g.prices_at * 1000);
+    $("foot").textContent = `Prices: GE 1-hour averages as of ${when.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}. ` +
+      `Profit buys inputs and sells outputs instantly, after GE tax. GP/hr is capped by speed, one buy limit, or ${Math.round(g.market_share * 100)}% of an hour's trading. ` +
+      `Recipes from the OSRS Wiki; ${nf.format(RECIPES.length)} recipes, ${nf.format(ITEMS.length)} items.`;
+    route();
+  }).catch((e) => { $("status").textContent = "Couldn't load the recipe data (" + e.message + "). Try reloading."; });
+
+  // ---------------- routing: #Item_name, so links and the back button work
+  const route = () => {
+    const name = location.hash ? unslug(location.hash.slice(1)) : "Runite bar";
+    const i = byName.get(name.toLowerCase());
+    if (i == null) { location.replace("#" + slug("Runite bar")); return; }
+    show(i);
+  };
+  window.addEventListener("hashchange", route);
+  const go = (i, fromEl) => {
+    if (i === state.item) return;
+    lastFrom = fromEl ? fromEl.getBoundingClientRect() : null;
+    location.hash = slug(ITEMS[i].n);
+  };
+  let lastFrom = null;
+
+  // ---------------- sorting and filtering a side
+  const SORTS = { gph: "Best GP/hr", profit: "Best profit each", xp: "Most XP", level: "Lowest level", traded: "Most traded" };
+  const level = (r) => (r.lv && r.lv.length ? Math.max(...r.lv.map((l) => l[1])) : 0);
+  const keyFor = (r, s) => ({ gph: r.g ?? (r.p != null ? r.p : null), profit: r.p ?? null, xp: r.x || null,
+    level: -level(r), traded: r.mv ?? null })[s];
+  const sortList = (list, s) => list.sort((a, b) => {
+    const ra = RECIPES[a], rb = RECIPES[b], ka = keyFor(ra, s), kb = keyFor(rb, s);
+    if (ka == null && kb == null) return (rb.x || 0) - (ra.x || 0);
+    if (ka == null) return 1; if (kb == null) return -1;
+    if (s === "gph" && (ra.g == null) !== (rb.g == null)) return ra.g == null ? 1 : -1;
+    return kb - ka;
+  });
+
+  // ---------------- render
+  const show = (i) => {
+    const prev = state.item;
+    state.item = i;
+    if (prev !== i) { state.up = { ...state.up, skill: null, all: false }; state.down = { ...state.down, skill: null, all: false }; }
+    const t = state.trail.filter((x) => x !== i); t.push(i); state.trail = t.slice(-8);
+    document.title = ITEMS[i].n + " · GE Supply Chains";
+    renderTrail(); renderCenter(); renderSide("up"); renderSide("down");
+    requestAnimationFrame(() => { drawLinks(true); flyIn(); });
+  };
+
+  const renderTrail = () => {
+    const nav = $("trail"); nav.replaceChildren(el("span", "lbl", "Trail"));
+    state.trail.forEach((i, n) => {
+      if (n) nav.append(el("span", "sep", "›"));
+      const a = el("a"); a.href = "#" + slug(ITEMS[i].n); a.append(icon(i), ITEMS[i].n);
+      if (i === state.item) a.setAttribute("aria-current", "page");
+      nav.append(a);
+    });
+  };
+
+  const stat = (dl, label, value) => { dl.append(el("dt", null, label), el("dd", null, value)); };
+
+  const renderCenter = () => {
+    const i = state.item, it = ITEMS[i], c = $("center");
+    c.replaceChildren(); c.classList.remove("enter-c"); void c.offsetWidth; c.classList.add("enter-c");
+    const ic = icon(i, true); ic.id = "center-icon"; c.append(ic, el("h2", null, it.n));
+    const badges = el("div", "badges");
+    badges.append(el("span", "badge", it.id != null ? "Trades on the GE" : "Not on the GE"));
+    if (it.m != null) badges.append(el("span", "badge", it.m ? "Members" : "Free-to-play"));
+    c.append(badges);
+    if (it.id != null) {
+      const dl = el("dl", "stats");
+      const exact = (v) => (v >= 1e7 ? gp(v) : nf.format(Math.round(v)));
+      stat(dl, "Buy now", buyP(it) != null ? exact(buyP(it)) : "—");
+      stat(dl, "Sell now", sellP(it) != null ? exact(sellP(it)) : "—");
+      stat(dl, "Traded last hour", it.v != null ? gp(it.v) : "—");
+      stat(dl, "Buy limit (4h)", it.l != null ? nf.format(it.l) : "—");
+      c.append(dl);
+    }
+    c.append(verdicts(i));
+    const w = el("a", "wiki", "Open on the OSRS Wiki ↗"); w.href = "https://oldschool.runescape.wiki/w/" + slug(it.n);
+    w.target = "_blank"; w.rel = "noopener"; c.append(w);
+  };
+
+  // Two plain answers: make it or buy it? sell it or process it?
+  const verdicts = (i) => {
+    const box = el("div", "verdicts"), it = ITEMS[i], buy = buyP(it);
+    // cheapest way to make one, among recipes whose inputs all have prices
+    let best = null;
+    madeBy[i].forEach((k) => {
+      const r = RECIPES[k]; if (r.p == null) return;
+      const outQ = r.o.find(([o]) => o === i)[1];
+      const cost = (r.c || 0) + r.i.reduce((s, [j, q]) => s + q * buyP(ITEMS[j]), 0);
+      const per = cost / outQ;
+      if (!best || per < best.per) best = { per, k };
+    });
+    if (best && buy != null) {
+      const save = buy - best.per, v = el("div", "verdict " + (save > 0 ? "good" : "bad"));
+      v.append(el("b", null, save > 0 ? `Cheaper to make: saves ${gp(save)} each` : `Cheaper to buy: making costs ${gp(-save)} more each`));
+      v.append("Best recipe: ", link(best.k), save > 0 ? ". Doesn't count your time." : ".");
+      box.append(v);
+    } else if (madeBy[i].length === 0) {
+      box.append(Object.assign(el("div", "verdict"), { textContent: "Not made from anything: gathered, dropped or bought from a shop." }));
+    }
+    // best use per unit of this item
+    let use = null;
+    usedIn[i].forEach((k) => {
+      const r = RECIPES[k]; if (r.p == null) return;
+      const q = r.i.find(([j]) => j === i)[1];
+      const per = r.p / q;
+      if (!use || per > use.per) use = { per, k };
+    });
+    if (use) {
+      const v = el("div", "verdict " + (use.per > 0 ? "good" : "bad"));
+      v.append(el("b", null, use.per > 0 ? `Worth processing: best use earns ${signed(use.per)} per item` : "Sell it: every priced use loses money"));
+      v.append(use.per > 0 ? "Best use: " : "Least bad: ", link(use.k), RECIPES[use.k].g != null ? ` (${signed(RECIPES[use.k].g)}/hr).` : ".");
+      box.append(v);
+    } else if (usedIn[i].length === 0) {
+      box.append(Object.assign(el("div", "verdict"), { textContent: "Not an ingredient in any recipe the Wiki lists." }));
+    }
+    return box;
+  };
+  const link = (k) => { // jump to the recipe's other end
+    const r = RECIPES[k], target = r.o.find(([o]) => o !== state.item)?.[0] ?? primaryInput(r);
+    const a = el("a", null, r.n); a.href = "#" + slug(ITEMS[target].n); return a;
+  };
+  const primaryInput = (r) => {
+    const others = r.i.filter(([j]) => j !== state.item);
+    const pool = others.length ? others : r.i;
+    return pool.slice().sort((a, b) => (buyP(ITEMS[b[0]]) ?? 0) * b[1] - (buyP(ITEMS[a[0]]) ?? 0) * a[1])[0][0];
+  };
+
+  const renderSide = (side) => {
+    const i = state.item, sec = $(side), st = state[side];
+    const all = side === "up" ? madeBy[i] : usedIn[i];
+    sec.replaceChildren();
+    const head = el("div", "side-head");
+    const h = el("h2"); h.append(side === "up" ? "Made from " : "Used to make ", el("b", null, nf.format(all.length)));
+    head.append(h);
+    if (all.length > 1) {
+      const ctr = el("div", "controls");
+      const sel = el("select"); sel.setAttribute("aria-label", "Sort " + (side === "up" ? "recipes that make it" : "uses"));
+      Object.entries(SORTS).forEach(([k, label]) => sel.append(new Option(label, k)));
+      sel.value = st.sort; sel.onchange = () => { st.sort = sel.value; renderSide(side); drawLinks(false); };
+      ctr.append(sel);
+      const skills = new Map();
+      all.forEach((k) => RECIPES[k].k.split(" + ").forEach((s) => skills.set(s, (skills.get(s) || 0) + 1)));
+      if (skills.size > 1) [...skills].sort((a, b) => b[1] - a[1]).slice(0, 6).forEach(([s, n]) => {
+        const b = el("button", "chip", `${s === "None" ? "No skill" : s} ${n}`); b.type = "button";
+        b.setAttribute("aria-pressed", String(st.skill === s));
+        b.onclick = () => { st.skill = st.skill === s ? null : s; st.all = false; renderSide(side); drawLinks(false); };
+        ctr.append(b);
+      });
+      head.append(ctr);
+    }
+    sec.append(head);
+    if (!all.length) {
+      sec.append(el("div", "empty", side === "up" ? "Nothing makes this. It's gathered, dropped or bought from a shop."
+        : "No recipe on the Wiki uses this."));
+      return;
+    }
+    let list = sortList(all.filter((k) => !st.skill || RECIPES[k].k.split(" + ").includes(st.skill)), st.sort);
+    const shown = st.all ? list : list.slice(0, SHOW);
+    shown.forEach((k, n) => sec.append(card(k, side, n)));
+    if (list.length > shown.length) {
+      const b = el("button", "btn more", `Show all ${nf.format(list.length)}`); b.type = "button";
+      b.onclick = () => { st.all = true; renderSide(side); drawLinks(false); };
+      sec.append(b);
+    }
+  };
+
+  const chip = (j, q, self) => {
+    const a = el("a", "it" + (self ? " self" : "")); a.href = "#" + slug(ITEMS[j].n);
+    a.append(icon(j)); if (q !== 1) a.append(el("span", "q", qty(q) + "×")); a.append(ITEMS[j].n);
+    a.addEventListener("click", (e) => { e.stopPropagation(); lastFrom = a.getBoundingClientRect(); });
+    return a;
+  };
+
+  const card = (k, side, n) => {
+    const r = RECIPES[k], i = state.item;
+    const c = el("div", "rc enter-" + (side === "up" ? "l" : "r"));
+    c.style.animationDelay = (REDUCED ? 0 : Math.min(n, 10) * 25) + "ms";
+    c.dataset.k = k; c.tabIndex = 0; c.setAttribute("role", "link");
+    c.classList.add(r.p == null ? "flat" : r.p > 0 ? "pos" : "neg");
+    const top = el("div", "rc-top");
+    const lv = r.lv && r.lv.length ? r.lv.map(([s, l]) => `${s} ${l}`).join(" · ") : (r.k === "None" ? "No skill" : r.k);
+    top.append(el("span", "skill", lv));
+    const how = [method(r), r.f, (r.t || []).join(", ")].filter(Boolean).filter((v, x, a) => a.indexOf(v) === x).join(" · ");
+    if (how) top.append(el("span", "how", how));
+    c.append(top);
+    let target;
+    if (side === "up") {
+      const outQ = r.o.find(([o]) => o === i)[1];
+      const items = el("div", "items"); r.i.forEach(([j, q]) => items.append(chip(j, q)));
+      c.append(items);
+      const extra = [];
+      if (r.c) extra.push(`+ ${gp(r.c)} coins`);
+      if (outQ !== 1) extra.push(`makes ${qty(outQ)}`);
+      const others = r.o.filter(([o]) => o !== i);
+      const w = el("div", "rc-with");
+      if (extra.length) w.append(extra.join(" · "));
+      if (others.length) { w.append(" also makes "); others.forEach(([j, q]) => w.append(chip(j, q))); }
+      if (w.childNodes.length) c.append(w);
+      target = primaryInput(r);
+    } else {
+      const outs = r.o.filter(([o]) => o !== i);
+      const main = el("div", "rc-main");
+      const tgt = outs[0] || r.o[0];
+      main.append(icon(tgt[0]), el("span", "nm", (tgt[1] !== 1 ? qty(tgt[1]) + "× " : "") + ITEMS[tgt[0]].n));
+      c.append(main);
+      const w = el("div", "rc-with");
+      const myQ = r.i.find(([j]) => j === i)[1];
+      w.append(`uses ${qty(myQ)}`);
+      const co = r.i.filter(([j]) => j !== i);
+      if (co.length) { w.append(" with "); co.forEach(([j, q]) => w.append(chip(j, q))); }
+      if (r.c) w.append(` + ${gp(r.c)} coins`);
+      c.append(w);
+      target = tgt[0];
+    }
+    const m = el("div", "rc-metrics");
+    if (r.p != null) {
+      if (r.g != null) m.append(el("span", "hr " + (r.g >= 0 ? "pos-t" : "neg-t"), signed(r.g) + "/hr"));
+      m.append(el("span", r.p >= 0 ? "pos-t" : "neg-t", signed(r.p) + " each"));
+    } else m.append(el("span", "na", r.i.concat(r.o).some(([j]) => ITEMS[j].id == null) ? "Not all items trade on the GE" : "No recent price"));
+    if (r.xv) m.append(el("span", null, "XP varies"));
+    else if (r.x) m.append(el("span", null, r.xh != null ? gp(r.xh) + " xp/hr" : nf.format(r.x) + " xp"));
+    c.append(m);
+    c.setAttribute("aria-label", `${r.n}: go to ${ITEMS[target].n}`);
+    const open = () => go(target, c);
+    c.addEventListener("click", open);
+    c.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+    c.addEventListener("pointerenter", () => hot(k, true)); c.addEventListener("pointerleave", () => hot(k, false));
+    c.addEventListener("focus", () => hot(k, true)); c.addEventListener("blur", () => hot(k, false));
+    return c;
+  };
+
+  // ---------------- the branching curves
+  const drawLinks = (animate) => {
+    const svg = $("links"), stage = $("stage");
+    svg.replaceChildren();
+    if (animate) svg.classList.remove("dim");
+    if (getComputedStyle(svg).display === "none") return;
+    const s = stage.getBoundingClientRect(), cr = $("center").getBoundingClientRect();
+    svg.setAttribute("viewBox", `0 0 ${s.width} ${s.height}`);
+    const cy = Math.min(cr.top + cr.height / 2, cr.top + 120) - s.top;
+    const vols = [...stage.querySelectorAll(".rc")].map((c) => RECIPES[c.dataset.k].mv || 0);
+    const vmax = Math.max(1, ...vols);
+    stage.querySelectorAll(".rc").forEach((c) => {
+      const r = RECIPES[c.dataset.k], b = c.getBoundingClientRect(), up = c.closest(".up");
+      const x0 = (up ? cr.left : cr.right) - s.left, x1 = (up ? b.right : b.left) - s.left;
+      const y1 = b.top + Math.min(b.height / 2, 28) - s.top, dx = Math.abs(x1 - x0) * 0.55;
+      const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      p.setAttribute("d", `M${x0},${cy} C${x0 + (up ? -dx : dx)},${cy} ${x1 + (up ? dx : -dx)},${y1} ${x1},${y1}`);
+      p.setAttribute("class", r.p == null ? "flat" : r.p > 0 ? "pos" : "neg");
+      p.dataset.k = c.dataset.k;
+      p.style.strokeWidth = (1.5 + 3 * Math.sqrt((r.mv || 0) / vmax)).toFixed(2);
+      svg.append(p);
+      if (animate && !REDUCED) {
+        const len = p.getTotalLength(); p.style.strokeDasharray = len; p.style.setProperty("--len", len); p.classList.add("draw");
+        p.addEventListener("animationend", () => { p.style.strokeDasharray = ""; p.classList.remove("draw"); }, { once: true });
+      }
+    });
+  };
+  const hot = (k, on) => {
+    const svg = $("links"); svg.classList.toggle("dim", on);
+    svg.querySelectorAll("path").forEach((p) => p.classList.toggle("hot", on && p.dataset.k === String(k)));
+    svg.querySelectorAll("path.hot").forEach((p) => { p.dataset.w = p.dataset.w || p.style.strokeWidth; p.style.strokeWidth = Math.max(4, parseFloat(p.dataset.w)) + "px"; });
+    if (!on) svg.querySelectorAll("path").forEach((p) => { if (p.dataset.w) { p.style.strokeWidth = p.dataset.w; delete p.dataset.w; } });
+  };
+  // the clicked item's picture flies into the middle
+  const flyIn = () => {
+    if (!lastFrom || REDUCED) { lastFrom = null; return; }
+    const to = $("center-icon"); if (!to) return;
+    const b = to.getBoundingClientRect();
+    const dx = lastFrom.left + lastFrom.width / 2 - (b.left + b.width / 2), dy = lastFrom.top + lastFrom.height / 2 - (b.top + b.height / 2);
+    to.animate([{ transform: `translate(${dx}px, ${dy}px) scale(.4)`, opacity: .6 }, { transform: "none", opacity: 1 }],
+      { duration: 420, easing: "cubic-bezier(.2,.8,.2,1)" });
+    lastFrom = null;
+  };
+  new ResizeObserver(() => { if (G) drawLinks(false); }).observe($("stage"));
+  // the middle card stays in view while you scroll a long list; keep the curves attached to it
+  let raf = 0;
+  window.addEventListener("scroll", () => { if (!G || raf) return; raf = requestAnimationFrame(() => { raf = 0; drawLinks(false); }); }, { passive: true });
+
+  // ---------------- search
+  const q = $("q"), list = $("suggest"), combo = q.parentElement;
+  let hits = [], sel = -1;
+  const score = (it, s, i) => {
+    const n = it.n.toLowerCase(); if (!n.includes(s)) return -1;
+    return (n === s ? 1000 : n.startsWith(s) ? 500 : 0) + (it.id != null ? 100 : 0) + Math.min(99, madeBy[i].length + usedIn[i].length);
+  };
+  const renderSuggest = () => {
+    list.replaceChildren();
+    hits.forEach((i, n) => {
+      const li = el("li"); li.setAttribute("role", "option"); li.id = "opt-" + n;
+      li.setAttribute("aria-selected", String(n === sel));
+      li.append(icon(i), ITEMS[i].n, el("span", "count", `${madeBy[i].length} ← · → ${usedIn[i].length}`));
+      li.onmousedown = (e) => { e.preventDefault(); pick(i); };
+      list.append(li);
+    });
+    list.hidden = !hits.length; combo.setAttribute("aria-expanded", String(!!hits.length));
+    q.setAttribute("aria-activedescendant", sel >= 0 ? "opt-" + sel : "");
+  };
+  const pick = (i) => { q.value = ""; hits = []; sel = -1; renderSuggest(); q.blur(); go(i, null); };
+  q.addEventListener("input", () => {
+    const s = q.value.trim().toLowerCase(); sel = -1;
+    hits = s.length < 2 || !ITEMS ? [] : ITEMS.map((it, i) => [score(it, s, i), i]).filter(([v]) => v >= 0)
+      .sort((a, b) => b[0] - a[0] || ITEMS[a[1]].n.length - ITEMS[b[1]].n.length).slice(0, 12).map(([, i]) => i);
+    renderSuggest();
+  });
+  q.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown" && hits.length) { sel = (sel + 1) % hits.length; renderSuggest(); e.preventDefault(); }
+    else if (e.key === "ArrowUp" && hits.length) { sel = (sel - 1 + hits.length) % hits.length; renderSuggest(); e.preventDefault(); }
+    else if (e.key === "Enter" && hits.length) { pick(hits[Math.max(sel, 0)]); e.preventDefault(); }
+    else if (e.key === "Escape") { hits = []; renderSuggest(); }
+  });
+  q.addEventListener("blur", () => setTimeout(() => { hits = []; renderSuggest(); }, 100));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "/" && document.activeElement !== q) { e.preventDefault(); q.focus(); }
+  });
+})();
+</script>
+</body>
+</html>
