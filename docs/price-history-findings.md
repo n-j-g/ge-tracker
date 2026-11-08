@@ -114,7 +114,7 @@ normal value, excluding each item's first 30 days on the GE (launch prices).
   at least half the last price).
 - **Reactive trap:** after each transfer, list that item for 7 days at half the price
   just seen (8 slots, newest wins): catches ~20% of transfers, median ~560m a month over
-  2022–26 and ~135m a month in 2026, with a catch in every month. Same caveats as above;
+  2022–26, ~240m since 2025 and ~150m in 2026, with a catch in every month. Same caveats as above;
   being intercepted may itself make them drop the item.
 - Untested assumptions: that the GE really fills the cheapest resting offer first for
   these trades, and that the transferrer doesn't check for other offers first. Gold
