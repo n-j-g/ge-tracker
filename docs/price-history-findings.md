@@ -107,6 +107,15 @@ normal value, excluding each item's first 30 days on the GE (launch prices).
   transfers (13% expected by chance), but only 1% of such prints are followed by a
   transfer within 48h. Ordinary trading and stocking-up volume before a transfer look
   normal. These items trade in about a third of all hours, so they aren't dead items.
+- **But transfers cluster** (research/transfer_clustering.py). After a transfer on an item,
+  another on the same item follows within a week 30% of the time; a month later
+  the same one-week window has 10%, and six months later 5%. 58% of transfers fall on
+  days with 3+ transfer items. A repeat usually reuses the price (median ratio 0.98; 85%
+  at least half the last price).
+- **Reactive trap:** after each transfer, list that item for 7 days at half the price
+  just seen (8 slots, newest wins): catches ~20% of transfers, median ~560m a month over
+  2022–26 and ~135m a month in 2026, with a catch in every month. Same caveats as above;
+  being intercepted may itself make them drop the item.
 - Untested assumptions: that the GE really fills the cheapest resting offer first for
   these trades, and that the transferrer doesn't check for other offers first. Gold
   traced to real-world trading can be removed by Jagex, possibly with the receiving account
