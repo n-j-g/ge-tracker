@@ -75,3 +75,27 @@ sells instantly later. Compared with the normal (trailing 30-day median) margin:
   product, which fades over a day, so sell fast.
 - For money-losing training methods, the same episodes make training 12–31% cheaper
   than usual (black d'hide, Saradomin brews, super restores, prayer potions, dragon darts).
+
+## Suspected gold transfers (research/transfer_scan.py, transfer_episodes.py, trap_backtest.py)
+
+Following [poignanttech's "Virtual Markets" part two](https://poignanttech.com/2024/03/01/virtual-markets-part-two-market-fundamentals-and-the-high-low-spread/):
+an hour where an item traded at ≥ 20× its median price that month, with ≥ 10m gp above
+normal value, excluding each item's first 30 days on the GE (launch prices).
+
+- **About 3,500 episodes on 757 items since 2021**, 120–290b gp a year (falling: ~290b in
+  2022, ~130b a year since 2024). The median episode moves ~115m gp; 87% last a single hour.
+- **They favour worthless, low-dose potions and junk**: Defence potion(1)/(2), divine
+  potions, barbarian mixes, Guthix rest(1), Relicym's balm, swamp weed, Blamish shells.
+  The same items recur for years (87 items have 10+ episodes), but in 2026 the
+  transferrers rotate items faster.
+- Evenings and nights UTC (peak 19:00–23:00), busiest on Saturdays.
+- **Trap backtest (a ceiling, not a forecast):** each month list the 8 items with the most
+  episodes in the past year at half their usual transfer price. If GE price priority
+  means a resting cheaper ask fills first, those offers would have met ~14% of episodes
+  and caught a median ~320m a month (2022–2026), ~180m a month since 2025, and nothing in
+  Aug–Oct 2026. If transferrers abandon an item after one interception, it drops to ~78m
+  a month on average (zero in most months).
+- Untested assumptions: that the GE really fills the cheapest resting offer first for
+  these trades, and that the transferrer doesn't check for other offers first. Gold
+  traced to real-world trading can be removed by Jagex, possibly with the receiving account
+  flagged.
