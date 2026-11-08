@@ -56,3 +56,22 @@ Interactive version: the "GE price history findings" dashboard on claude.ai.
 - Advisor: per skill, show today's XP price against its history ("cheap now / dear now").
 - Next studies: Magic (alching), Runecraft; stockpiling across buy-limit windows;
   price impact of large orders; a long-run inflation adjustment.
+
+## Acting on wide margins (research/early_detection.py)
+
+Simulation: the hourly average for hour t shows a margin entering its top 10% vs
+the past 30 days; the player buys inputs instantly in hour t+1, processes, and
+sells instantly later. Compared with the normal (trailing 30-day median) margin:
+
+- **Hourly data is early enough.** Selling 4 hours later still keeps a median ~79%
+  of the gap that was seen (range ~36–100%), and the trade beats the normal margin
+  in 84–99% of episodes. Faster (5-minute) detection could add only the small
+  remainder.
+- **A wide-margin session pays a median ~28% more** than a normal session of the
+  same method (range ~19–53%). Each chain has about 8 such episodes a month.
+- **Where the gap comes from decides the move.** Blast Furnace bars and black
+  d'hide: the gap is cheap inputs, locked in the moment you buy, so there's no rush
+  to sell. Bolt tips, manta rays, ranarr unf, rings of recoil: the gap is a pricier
+  product, which fades over a day, so sell fast.
+- For money-losing training methods, the same episodes make training 12–25% cheaper
+  than usual (black d'hide, Saradomin brews, super restores, prayer potions).
