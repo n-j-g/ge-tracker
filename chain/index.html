@@ -231,7 +231,11 @@
   };
   const buyP = (it) => (it.b == null && it.s == null ? null : Math.max(it.b ?? -Infinity, it.s ?? -Infinity));
   const sellP = (it) => (it.b == null && it.s == null ? null : Math.min(it.b ?? Infinity, it.s ?? Infinity));
-  const method = (r) => { const m = r.n.match(/\(([^)]*)\)\s*$/); return m ? m[1] : null; };
+  // "Runite bar (Blast Furnace)" -> "Blast Furnace"; but "Magic longbow (u)" is just the item's name
+  const method = (r) => {
+    const out = r.o[0] ? ITEMS[r.o[0][0]].n : "";
+    return r.n !== out && r.n.startsWith(out + " (") && r.n.endsWith(")") ? r.n.slice(out.length + 2, -1) : null;
+  };
 
   // ---------------- load
   fetch("graph.json").then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((g) => {
@@ -457,7 +461,8 @@
     }
     const m = el("div", "rc-metrics");
     if (r.p != null) {
-      if (r.g != null) m.append(el("span", "hr " + (r.g >= 0 ? "pos-t" : "neg-t"), signed(r.g) + "/hr"));
+      if (r.mv === 0) m.append(el("span", "na", "No trades last hour"));
+      else if (r.g != null) m.append(el("span", "hr " + (r.g >= 0 ? "pos-t" : "neg-t"), signed(r.g) + "/hr"));
       m.append(el("span", r.p >= 0 ? "pos-t" : "neg-t", signed(r.p) + " each"));
     } else m.append(el("span", "na", r.i.concat(r.o).some(([j]) => ITEMS[j].id == null) ? "Not all items trade on the GE" : "No recent price"));
     if (r.xv) m.append(el("span", null, "XP varies"));
