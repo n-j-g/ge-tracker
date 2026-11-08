@@ -63,15 +63,15 @@ Simulation: the hourly average for hour t shows a margin entering its top 10% vs
 the past 30 days; the player buys inputs instantly in hour t+1, processes, and
 sells instantly later. Compared with the normal (trailing 30-day median) margin:
 
-- **Hourly data is early enough.** Selling 4 hours later still keeps a median ~79%
-  of the gap that was seen (range ~36–100%), and the trade beats the normal margin
-  in 84–99% of episodes. Faster (5-minute) detection could add only the small
+- **Hourly data is early enough.** Selling 4 hours later still keeps a median ~76%
+  of the gap that was seen (range ~36–95%), and the trade beats the normal margin
+  in 72–99% of episodes. Faster (5-minute) detection could add only the small
   remainder.
-- **A wide-margin session pays a median ~28% more** than a normal session of the
-  same method (range ~19–53%). Each chain has about 8 such episodes a month.
+- **A wide-margin session pays a median ~29% more** than a normal session of the
+  same method (mostly 19–53%; more where the normal margin is tiny). Each chain has about 8 such episodes a month.
 - **Where the gap comes from decides the move.** Blast Furnace bars and black
   d'hide: the gap is cheap inputs, locked in the moment you buy, so there's no rush
   to sell. Bolt tips, manta rays, ranarr unf, rings of recoil: the gap is a pricier
   product, which fades over a day, so sell fast.
-- For money-losing training methods, the same episodes make training 12–25% cheaper
-  than usual (black d'hide, Saradomin brews, super restores, prayer potions).
+- For money-losing training methods, the same episodes make training 12–31% cheaper
+  than usual (black d'hide, Saradomin brews, super restores, prayer potions, dragon darts).
