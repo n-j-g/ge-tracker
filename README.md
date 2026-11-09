@@ -57,6 +57,12 @@ python3 chain/build_graph.py --offline        # after a normal run has saved dat
 cd chain && python3 -m http.server             # then open http://localhost:8000
 ```
 
+## Transfer-trap paper trading
+
+`live/watch.py` runs around the clock on a small server, watching for suspected gold
+transfers and paper-trading resting sell offers against them. Results:
+https://n-j-g.github.io/ge-tracker/paper/. Setup steps: [live/README.md](live/README.md).
+
 ## Research: price history
 
 `research/backfill_history.py` downloads the API's full hourly history (every

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transfer traps · paper trading</title>
+<style>
+  :root { color-scheme: light;
+    --bg: #d8ccb4; --panel: #e2dbc8; --panel-2: #ebe4d3; --fg: #3a2f1e; --muted: #6e5f47;
+    --line: #b8a888; --frame: #94866d; --title: #6b3f1c; --accent: #936039; --focus: #6b3f1c;
+    --pos: #1d6b16; --neg: #a8221a; --warn: #8a5a00;
+    --font-text: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --font-num: ui-monospace, Menlo, Consolas, monospace;
+    --font-title: Georgia, "Times New Roman", serif; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { color-scheme: dark;
+      --bg: #2b241b; --panel: #3e3529; --panel-2: #463c2f; --fg: #e6d6b0; --muted: #a8977a;
+      --line: #574b3b; --frame: #1e1912; --title: #ff981f; --accent: #ffff00; --focus: #ff981f;
+      --pos: #30d030; --neg: #ff5a4d; --warn: #ffb52e; }
+  }
+  :root[data-theme="dark"] { color-scheme: dark;
+    --bg: #2b241b; --panel: #3e3529; --panel-2: #463c2f; --fg: #e6d6b0; --muted: #a8977a;
+    --line: #574b3b; --frame: #1e1912; --title: #ff981f; --accent: #ffff00; --focus: #ff981f;
+    --pos: #30d030; --neg: #ff5a4d; --warn: #ffb52e; }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--fg); font: 14px/1.45 var(--font-text); margin: 0; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  .top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  h1 { font: 700 22px/1.2 var(--font-title); color: var(--title); margin: 0; letter-spacing: .02em; }
+  h2 { font: 700 16px/1.3 var(--font-title); color: var(--title); margin: 24px 0 8px; }
+  .spacer { flex: 1; }
+  a { color: var(--title); }
+  .btn { font: inherit; color: var(--title); background: var(--panel); border: 2px solid var(--frame);
+         border-radius: 4px; padding: 4px 10px; cursor: pointer; text-decoration: none; }
+  .btn:hover { background: var(--panel-2); }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .lede { color: var(--muted); margin: 4px 0 12px; max-width: 75ch; }
+  .health { padding: 8px 12px; border: 2px solid var(--frame); border-radius: 4px; background: var(--panel); }
+  .health.stale { border-color: var(--warn); color: var(--warn); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+  .card { background: var(--panel); border: 2px solid var(--frame); border-radius: 4px; padding: 12px 14px; }
+  .card h3 { margin: 0 0 2px; font: 700 15px var(--font-title); color: var(--title); }
+  .card .how { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 12px; }
+  .stat .v { font: 600 18px var(--font-num); }
+  .stat .k { color: var(--muted); font-size: 12px; }
+  .pos { color: var(--pos); }
+  .muted { color: var(--muted); }
+  .tablewrap { overflow-x: auto; border: 2px solid var(--frame); border-radius: 4px; background: var(--panel); }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { padding: 5px 10px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-weight: 600; color: var(--muted); font-size: 12px; background: var(--panel-2); }
+  td.n, th.n { text-align: right; font-family: var(--font-num); }
+  tr:last-child td { border-bottom: 0; }
+  .tag { display: inline-block; font-size: 11px; padding: 0 6px; border-radius: 3px; border: 1px solid var(--frame);
+         margin-right: 4px; background: var(--panel-2); }
+  .empty { padding: 12px; color: var(--muted); }
+  footer { color: var(--muted); font-size: 12px; margin: 28px 0 12px; max-width: 80ch; }
+  @media (max-width: 600px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <h1>Transfer traps</h1>
+    <span class="muted">paper trading, no real offers</span>
+    <span class="spacer"></span>
+    <a class="btn" href="../">Methods</a>
+    <a class="btn" href="../chain/">Supply chains</a>
+    <button class="btn" id="theme" type="button">Light/dark</button>
+  </div>
+  <p class="lede">Watches the GE for suspected gold transfers (a near-worthless item suddenly trading at 20&times;
+    its normal price, 10m+ gp above value) and keeps imaginary sell offers on the items most likely to be used
+    again, to see whether they would have been filled.</p>
+  <div id="health" class="health">Loading…</div>
+  <div id="books" class="cards" style="margin-top:12px"></div>
+  <h2>Recent transfers</h2>
+  <div class="tablewrap" id="transfers"></div>
+  <h2>Paper fills</h2>
+  <div class="tablewrap" id="fills"></div>
+  <h2>Offers up now</h2>
+  <div id="offers"></div>
+  <footer>
+    A fill assumes the GE matches a transfer's bid against our cheaper offer first and that the transferrer
+    doesn't notice it, so treat these numbers as an upper limit. Offers go up 10 minutes after a transfer is
+    detected (time to log in). Gold is after GE tax. Backtests on 2022–2026 history: offers sat on the item in
+    about 20–25% of transfers. Gold traced to real-world trading can be removed by Jagex.
+  </footer>
+</main>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var DATA = params.get("data") || "https://raw.githubusercontent.com/n-j-g/ge-paper-data/main/status.json";
+  var root = document.documentElement;
+  try { var t = localStorage.getItem("ge-theme"); if (t) root.setAttribute("data-theme", t); } catch (e) {}
+  document.getElementById("theme").addEventListener("click", function () {
+    var dark = root.getAttribute("data-theme") ? root.getAttribute("data-theme") === "dark"
+      : matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("ge-theme", next); } catch (e) {}
+  });
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
+  function gp(x) {
+    var a = Math.abs(x), s = x < 0 ? "-" : "";
+    if (a >= 1e9) return s + (a / 1e9).toFixed(a >= 1e10 ? 1 : 2) + "b";
+    if (a >= 1e6) return s + (a / 1e6).toFixed(a >= 1e7 ? 0 : 1) + "m";
+    if (a >= 1e4) return s + Math.round(a / 1e3) + "k";
+    return s + Math.round(a).toLocaleString();
+  }
+  function when(ts) {
+    var d = new Date(ts * 1000);
+    return d.toLocaleDateString(undefined, {month: "short", day: "numeric"}) + " " +
+      d.toLocaleTimeString(undefined, {hour: "numeric", minute: "2-digit"});
+  }
+  function ago(ts) {
+    var m = Math.max(0, Math.round((Date.now() / 1000 - ts) / 60));
+    if (m < 1) return "just now";
+    if (m < 60) return m + " min ago";
+    if (m < 2880) return Math.round(m / 60) + " h ago";
+    return Math.round(m / 1440) + " days ago";
+  }
+  function pct(a, b) { return b ? Math.round(100 * a / b) + "%" : "–"; }
+  function table(head, rows, empty) {
+    if (!rows.length) return '<div class="empty">' + esc(empty) + "</div>";
+    var h = "<table><thead><tr>" + head.map(function (c) {
+      return '<th class="' + (c[1] || "") + '">' + esc(c[0]) + "</th>"; }).join("") + "</tr></thead><tbody>";
+    return h + rows.map(function (r) {
+      return "<tr>" + r.map(function (c, i) { return '<td class="' + (head[i][1] || "") + '">' + c + "</td>"; }).join("") + "</tr>";
+    }).join("") + "</tbody></table>";
+  }
+  var LABEL = {newest: ["Newest", "After each transfer, list that item for 7 days at half the price seen (8 offers)."],
+               score: ["Recency score", "Hold the 8 items with the highest recent-transfer score, re-ranked as transfers come in."]};
+
+  function render(s) {
+    var now = Date.now() / 1000, stale = now - s.updated > 3 * 3600;
+    var h = document.getElementById("health");
+    h.className = "health" + (stale ? " stale" : "");
+    h.innerHTML = (stale ? "<b>No update for " + esc(ago(s.updated).replace(" ago", "")) + ": the watcher may be down.</b> " : "") +
+      "Updated " + esc(ago(s.updated)) + " · running since " + esc(when(s.started)) +
+      " · " + s.transfers_total + " transfers seen (" + s.transfers_24h + " in the last day)" +
+      " · watching " + s.watched.toLocaleString() + " items";
+
+    document.getElementById("books").innerHTML = s.books.map(function (b) {
+      var l = LABEL[b.name] || [b.name, ""];
+      return '<div class="card"><h3>' + esc(l[0]) + '</h3><div class="how">' + esc(l[1]) + '</div><div class="stats">' +
+        stat(b.seen, "transfers seen") + stat(pct(b.on_trap, b.seen), "on our items") +
+        stat(b.episodes_caught, "caught") +
+        stat('<span class="pos">' + gp(b.net) + "</span>", "paper gp") + stat(b.fills, "fills") +
+        stat(pct(b.same_episode, b.fills), "same session") + "</div></div>";
+    }).join("");
+    function stat(v, k) { return '<div class="stat"><div class="v">' + v + '</div><div class="k">' + esc(k) + "</div></div>"; }
+
+    document.getElementById("transfers").innerHTML = table(
+      [["When"], ["Item"], ["Units", "n"], ["Avg price", "n"], ["Gold", "n"], ["Detected after", "n"], ["Caught by"]],
+      s.transfers.slice(0, 30).map(function (t) {
+        var lag = Math.max(0, Math.round((t.detected - t.start) / 60));
+        return [esc(when(t.start)), esc(t.name), t.units.toLocaleString(), gp(t.price), gp(t.gold),
+                lag + " min", t.caught_by.map(function (c) { return '<span class="tag">' + esc((LABEL[c] || [c])[0]) + "</span>"; }).join("") || '<span class="muted">–</span>'];
+      }), "No transfers seen yet. They come a few times a day on average, in bursts.");
+
+    var fills = [];
+    s.books.forEach(function (b) { b.recent_fills.forEach(function (f) { fills.push(Object.assign({label: (LABEL[b.name] || [b.name])[0]}, f)); }); });
+    fills.sort(function (a, b) { return b.ts - a.ts; });
+    document.getElementById("fills").innerHTML = table(
+      [["When"], ["Strategy"], ["Item"], ["Qty", "n"], ["Our ask", "n"], ["They paid", "n"], ["Net gp", "n"], ["Session"]],
+      fills.slice(0, 30).map(function (f) {
+        return [esc(when(f.ts)), esc(f.label), esc(f.name), f.qty.toLocaleString(), gp(f.ask), gp(f.price_seen),
+                '<span class="pos">' + gp(f.net) + "</span>", f.same_episode ? "same" : "later"];
+      }), "No paper fills yet.");
+
+    document.getElementById("offers").innerHTML = s.books.map(function (b) {
+      return '<h3 style="font:600 14px var(--font-text);margin:12px 0 6px">' + esc((LABEL[b.name] || [b.name])[0]) + "</h3>" +
+        '<div class="tablewrap">' + table([["Item"], ["Ask", "n"], ["Stock", "n"], ["Status"], ["Until"]],
+          b.offers.map(function (o) {
+            return [esc(o.name), gp(o.ask), o.stock.toLocaleString(),
+                    o.up ? "Up" : "Goes up " + esc(when(o.active_from)), o.expires ? esc(when(o.expires)) : "while ranked"];
+          }), "No offers.") + "</div>";
+    }).join("");
+  }
+
+  fetch(DATA, {cache: "no-store"}).then(function (r) {
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  }).then(render).catch(function () {
+    document.getElementById("health").innerHTML = "No results yet: the watcher hasn't published anything. " +
+      'Setup steps are in <a href="https://github.com/n-j-g/ge-tracker/blob/main/live/README.md">live/README.md</a>.';
+  });
+})();
+</script>
+</body>
+</html>

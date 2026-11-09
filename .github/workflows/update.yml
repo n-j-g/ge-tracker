@@ -57,6 +57,12 @@ jobs:
           cp chain/index.html site/chain/
           python chain/build_graph.py --offline --out site/chain/graph.json
 
+      # The paper-trading page reads its numbers live from the ge-paper-data repo.
+      - name: Add the transfer-trap page
+        run: |
+          mkdir -p site/paper
+          cp paper/index.html site/paper/
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
