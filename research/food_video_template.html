@@ -86,7 +86,15 @@ footer { color: var(--ink-2); font-size: 13px; line-height: 1.5; border-top: 1px
 </section>
 
 <section class="scene" id="scene-3c">
-  <div class="scene-head"><span class="scene-num">Scene 3c</span><h2>Sailing fish, week by week</h2></div>
+  <div class="scene-head"><span class="scene-num">Scene 3c</span><h2>Marlin took the "best food" premium</h2></div>
+  <div class="frame"><svg id="s3bis" viewBox="0 0 1000 562" role="img" aria-label="Premium of the 22 HP foods over the line through cheaper foods, 2023 to 2024 versus after Sailing: manta, tuna potato and dark crab fall by about a third, anglerfish by much less"></svg>
+    <div class="caption">When marlin arrived, 22 HP stopped being the best<small>Price above the line through monkfish, shark and sea turtle</small></div></div>
+  <div class="controls"><button id="s3bisplay">Play build</button></div>
+  <p class="notes"><b>Beats:</b> before Sailing, 22 HP was the most healing in one slot, and those foods sold far above the line through the cheaper fish: the top step is bought by the players whose slot is worth most. Then marlin (24 HP) arrives and the dots slide left: manta, tuna potato and dark crab lose about a third of their premium. Anglerfish loses much less, because no Sailing fish overheals like it does. <b>Line to land:</b> "Marlin took the crown for raw healing, so only the foods selling raw healing lost their premium." <b>Careful:</b> anglerfish still fell a little, and Sailing changed other things too, so say "consistent with", not "proves".</p>
+</section>
+
+<section class="scene" id="scene-3d">
+  <div class="scene-head"><span class="scene-num">Scene 3d</span><h2>Sailing fish, week by week</h2></div>
   <div class="frame"><svg id="s3c" viewBox="0 0 1000 562" role="img" aria-label="Animated scatter: Sailing fish start far above the line at launch and settle over the following year"></svg>
     <div class="caption">Sailing launch to now<small id="s3csub">Week of —</small></div></div>
   <div class="controls"><button id="s3cplay">Play</button><input type="range" id="s3cwk" min="0" max="0" value="0" aria-label="Week"><span class="wk" id="s3cwklab">—</span></div>
@@ -256,7 +264,43 @@ function scene3b() {
   });
 }
 
-/* ---------- scene 3c (animated weeks) */
+/* ---------- scene 3c: best-in-slot premium before and after Sailing */
+function scene3bis(anim) {
+  const svg = document.getElementById('s3bis'); svg.replaceChildren();
+  const L = 250, R = 860, X = (v) => L + (v / 100) * (R - L);
+  for (let v = 0; v <= 100; v += 20) {
+    el('line', { x1: X(v), x2: X(v), y1: 150, y2: 500, stroke: v === 0 ? css('--ink-2') : css('--grid') }, svg);
+    el('text', { x: X(v), y: 526, 'text-anchor': 'middle', 'font-size': 15, fill: css('--ink-2'), style: 'font-family:var(--mono)' }, svg, '+' + v + '%');
+  }
+  el('text', { x: (L + R) / 2, y: 552, 'text-anchor': 'middle', 'font-size': 15, fill: css('--ink-2') }, svg, 'Price above the line through cheaper fish');
+  el('circle', { cx: 640, cy: 128, r: 7, fill: 'none', stroke: css('--ink-2'), 'stroke-width': 2 }, svg);
+  el('text', { x: 652, y: 133, 'font-size': 14, fill: css('--ink-2') }, svg, '2023–24');
+  el('circle', { cx: 740, cy: 128, r: 7, fill: css('--core') }, svg);
+  el('text', { x: 752, y: 133, 'font-size': 14, fill: css('--ink-2') }, svg, 'after Sailing');
+  const movers = [];
+  D.bis.items.forEach((it, i) => {
+    const y = 190 + i * 82, col = it.n === 'Anglerfish' ? COL.special : COL.core;
+    const rel = Math.round((it.after / it.before - 1) * 100);
+    el('text', { x: L - 20, y: y + 6, 'text-anchor': 'end', 'font-size': 20, 'font-weight': 500 }, svg, it.n);
+    el('text', { x: L - 20, y: y + 28, 'text-anchor': 'end', 'font-size': 14, fill: css('--ink-2') }, svg, it.n === 'Anglerfish' ? 'overheal, 22 HP' : '22 HP');
+    const bar = el('line', { x1: X(it.before), x2: X(it.after), y1: y, y2: y, stroke: col, 'stroke-width': 3, opacity: 0.55 }, svg);
+    el('circle', { cx: X(it.before), cy: y, r: 9, fill: css('--frame'), stroke: css('--ink-2'), 'stroke-width': 2 }, svg);
+    const dot = el('circle', { cx: X(it.after), cy: y, r: 10, fill: col }, svg);
+    const lab = el('text', { x: X(Math.max(it.before, it.after)) + 22, y: y + 6, 'font-size': 17, style: 'font-family:var(--mono)' }, svg,
+      `+${Math.round(it.before)}% → +${Math.round(it.after)}%  (${rel}%)`);
+    movers.push({ it, dot, bar, lab, X });
+  });
+  if (!anim) return;
+  movers.forEach((m) => { m.dot.setAttribute('cx', m.X(m.it.before)); m.bar.style.opacity = 0; m.lab.style.opacity = 0; });
+  (async () => {
+    await sleep(900);
+    movers.forEach((m) => { m.dot.style.transition = 'cx 1400ms ease-in-out'; m.dot.setAttribute('cx', m.X(m.it.after)); });
+    await sleep(1500);
+    movers.forEach((m) => { fade(m.bar, true); m.bar.style.opacity = 0.55; fade(m.lab, true); });
+  })();
+}
+
+/* ---------- scene 3d (animated weeks) */
 const W3 = D.weeks;
 const wkInput = document.getElementById('s3cwk'); wkInput.max = W3.length - 1; wkInput.value = W3.length - 1;
 function scene3c(i) {
@@ -324,9 +368,10 @@ function scene4() {
 }
 
 /* ---------- boot: everything rests finished */
-scene1(true); scene2(false); scene3a(); scene3b(); scene3c(W3.length - 1); scene4();
+scene1(true); scene2(false); scene3a(); scene3b(); scene3c(W3.length - 1); scene3bis(false); scene4();
 document.getElementById('s1play').addEventListener('click', () => scene1(false));
 document.getElementById('s2play').addEventListener('click', () => scene2(true));
+document.getElementById('s3bisplay').addEventListener('click', () => scene3bis(true));
 </script>
 </body>
 </html>
