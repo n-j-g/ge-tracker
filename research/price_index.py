@@ -33,7 +33,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from research.basket import basket_items
+from research.basket import TIERS, basket_items, basket_tiers
 
 ROOT = Path(__file__).resolve().parent.parent
 IN = ROOT / "data" / "history" / "daily_prices.csv.gz"
@@ -128,6 +128,8 @@ def run(path: Path = IN, out: Path = OUT) -> dict:
     dropped = sorted(set(present) - set(items))
     w = base_weights(d, items, base)
     w["category"] = [cat_of[i] for i in w.index]
+    tiers = {lower[n.lower()]: t for n, t in basket_tiers().items() if n.lower() in lower}
+    w["tier"] = [tiers[i] for i in w.index]
 
     daily = pd.DataFrame({"fixed_basket": laspeyres(d["price"], w), "equal_weights": jevons(d["price"], w)})
 
@@ -140,6 +142,15 @@ def run(path: Path = IN, out: Path = OUT) -> dict:
         wc = w[w.category == cat].copy()
         wc["share"] = wc.share / wc.share.sum()
         mon[f"cat:{cat}"] = laspeyres(m["price"], wc)
+    # one index per tier (early / mid / late game), weighted by spending within the tier
+    for tier in TIERS:
+        wt = w[w.tier == tier].copy()
+        if wt.empty:
+            continue
+        wt["share"] = wt.share / wt.share.sum()
+        mon[f"tier:{tier}"] = laspeyres(m["price"], wt)
+        mon[f"tier_eq:{tier}"] = jevons(m["price"], wt)
+        mon[f"tier_yoy:{tier}"] = yoy(mon[f"tier:{tier}"])
     # broad index: every heavily traded item, gear included (chained, so new items can join)
     med_gp = d["gp"].median()
     broad = sorted(med_gp[med_gp >= BROAD_MIN_DAILY_GP].index.difference([BOND]))
@@ -181,6 +192,11 @@ def run(path: Path = IN, out: Path = OUT) -> dict:
         "inflation_last_12_months": round(float(mon.inflation_yoy.iloc[-1]), 4)
         if pd.notna(mon.inflation_yoy.iloc[-1]) else None,
         "broad_items": len(broad),
+        "tiers": {t: {"items": int((w.tier == t).sum()),
+                      "now": round(float(mon[f"tier:{t}"].iloc[-1]), 1),
+                      "equal_weights_now": round(float(mon[f"tier_eq:{t}"].iloc[-1]), 1),
+                      "last_12_months": round(float(mon[f"tier_yoy:{t}"].iloc[-1]), 4)}
+                  for t in TIERS if f"tier:{t}" in mon},
         "top_weights": w.share.sort_values(ascending=False).head(10).round(4).to_dict(),
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2))

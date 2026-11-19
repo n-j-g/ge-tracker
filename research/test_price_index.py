@@ -93,6 +93,10 @@ class PriceIndexTest(unittest.TestCase):
             self.assertAlmostEqual(jev.iloc[-1] / jev.iloc[-13] - 1, 1.2 ** 0.25 - 1, delta=0.005)
             self.assertGreater(mon["cat:Potions"].iloc[-1], 150)
             self.assertAlmostEqual(mon["cat:Food"].iloc[-1], 100, delta=0.5)
+            # prayer potions are mid game: only the Economy tier inflates
+            self.assertGreater(mon["tier:Economy"].iloc[-1], 110)
+            self.assertAlmostEqual(mon["tier:Basic"].iloc[-1], 100, delta=0.5)
+            self.assertEqual(items.tier["Shark"], "Economy")
 
     def test_daily_price_is_average_traded_price(self):
         with tempfile.TemporaryDirectory() as t:
