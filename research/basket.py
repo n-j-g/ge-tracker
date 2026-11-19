@@ -25,10 +25,10 @@ BASKET: dict[str, list[str]] = {
     ],
     "Ammo": [
         "Rune arrow", "Amethyst arrow", "Rune dart", "Dragon dart", "Ruby bolts (e)",
-        "Diamond bolts (e)", "Cannonball", "Zulrah's scales",
+        "Diamond bolts (e)", "Steel cannonball", "Zulrah's scales",
     ],
     "Teleports": [
-        "Teleport to house", "Varrock teleport", "Ring of dueling(8)", "Games necklace(8)",
+        "Teleport to house (tablet)", "Varrock teleport (tablet)", "Ring of dueling(8)", "Games necklace(8)",
         "Amulet of glory(6)",
     ],
     "Ores & bars": [
