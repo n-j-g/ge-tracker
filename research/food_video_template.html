@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OSRS food economics storyboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600&display=swap" rel="stylesheet">
+<style>
+/* single dark world, like a video frame: ink background, parchment text, one hue per food group */
+:root {
+  --bg: #0f1318; --frame: #161b22; --ink: #ece6d6; --ink-2: #a9a497; --rule: #2a313b; --grid: #222932;
+  --core: #5aa9e6; --special: #f0b44c; --f2p: #7cc47f; --sail: #ef7d62; --line: #c9c2b0;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+  --body: "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); }
+main { max-width: 1120px; margin: 0 auto; padding: 32px 16px 64px; display: flex; flex-direction: column; gap: 56px; }
+header h1 { font-family: var(--display); font-size: clamp(28px, 4vw, 40px); margin: 0 0 8px; text-wrap: balance; letter-spacing: 0.01em; }
+header p { color: var(--ink-2); max-width: 68ch; line-height: 1.55; margin: 0; }
+.scene { display: flex; flex-direction: column; gap: 12px; }
+.scene-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.scene-num { font-family: var(--mono); color: var(--ink-2); font-size: 14px; }
+.scene h2 { font-family: var(--display); font-size: clamp(20px, 2.6vw, 26px); margin: 0; text-wrap: balance; }
+.frame { position: relative; width: 100%; aspect-ratio: 16 / 9; background: var(--frame); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+.frame svg { width: 100%; height: 100%; display: block; }
+.frame svg text { font-family: var(--body); fill: var(--ink); }
+.caption { position: absolute; left: 3%; top: 4%; max-width: 55%; font-family: var(--display); font-size: clamp(14px, 2.2vw, 26px); line-height: 1.2; pointer-events: none; }
+.caption small { display: block; font-family: var(--body); font-weight: 400; color: var(--ink-2); font-size: 0.6em; margin-top: 6px; }
+.controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+button { font: 500 14px var(--body); color: var(--ink); background: transparent; border: 1px solid var(--rule); border-radius: 4px; padding: 7px 14px; cursor: pointer; }
+button:hover { border-color: var(--ink-2); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--core); outline-offset: 2px; }
+button[aria-pressed="false"] { color: var(--ink-2); }
+input[type=range] { flex: 1; min-width: 160px; accent-color: var(--sail); }
+.wk { font-family: var(--mono); font-size: 14px; color: var(--ink-2); min-width: 110px; }
+.notes { color: var(--ink-2); font-size: 15px; line-height: 1.55; max-width: 72ch; margin: 0; }
+.notes b { color: var(--ink); font-weight: 500; }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+footer { color: var(--ink-2); font-size: 13px; line-height: 1.5; border-top: 1px solid var(--rule); padding-top: 16px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>OSRS food economics: video storyboard</h1>
+  <p>Draft visuals for each scene, drawn from real Grand Exchange prices (OSRS Wiki price API, hourly, March 2021 to 6 November 2026). Each frame is 16:9 for screen recording. "Play build" runs the scene's animation; every frame also rests in its finished state.</p>
+</header>
+
+<section class="scene" id="scene-1">
+  <div class="scene-head"><span class="scene-num">Scene 1</span><h2>One straight line prices members' food</h2></div>
+  <div class="frame"><svg id="s1" viewBox="0 0 1000 562" role="img" aria-label="Scatter of six members foods, price against healing, on one straight line"></svg>
+    <div class="caption" id="s1cap">Bigger heals cost more, on a straight line<small>Price = 183 gp per HP − 2,793 gp</small></div></div>
+  <div class="controls"><button id="s1play">Play build</button></div>
+  <p class="notes"><b>Beats:</b> six everyday PvM foods appear one at a time; the line draws through them; then it extends left to where a food is worth 0 gp (about 15 HP) and on down to −2,793 gp at 0 HP. <b>Line to land:</b> "A food that heals nothing still costs you a slot. The market says a slot is worth about 2,800 gold, and a 15 HP food is worth nothing at all to a shark-eater."</p>
+</section>
+
+<section class="scene" id="scene-2">
+  <div class="scene-head"><span class="scene-num">Scene 2</span><h2>Everything else lands off the line</h2></div>
+  <div class="frame"><svg id="s2" viewBox="0 0 1000 562" role="img" aria-label="The same chart with special foods, free-to-play fish and Sailing fish added in their own colors"></svg>
+    <div class="caption">Then add everything else<small><span class="sw" style="background:var(--special)"></span>special effects &nbsp;<span class="sw" style="background:var(--f2p)"></span>free-to-play &nbsp;<span class="sw" style="background:var(--sail)"></span>Sailing</small></div></div>
+  <div class="controls">
+    <button id="s2play">Play build</button>
+    <button aria-pressed="true" data-g="special">Special effects</button>
+    <button aria-pressed="true" data-g="f2p">Free-to-play</button>
+    <button aria-pressed="true" data-g="sailing">Sailing</button>
+  </div>
+  <p class="notes"><b>Beats:</b> add each group in turn. Free-to-play fish sit far above the line, special foods sit a little off it, and the top Sailing fish fly above it. <b>Line to land:</b> "Every food off the line is telling us something the simple rule leaves out."</p>
+</section>
+
+<section class="scene" id="scene-3a">
+  <div class="scene-head"><span class="scene-num">Scene 3a</span><h2>Free-to-play is its own market</h2></div>
+  <div class="frame"><svg id="s3a" viewBox="0 0 1000 562" role="img" aria-label="Free-to-play fish with their own, much flatter line; swordfish costs more than monkfish"></svg>
+    <div class="caption">Free-to-play has its own line<small>Slot worth ≈ 400 gp, not 2,800</small></div></div>
+  <p class="notes"><b>Beats:</b> zoom into the cheap end. Draw the free-to-play line through tuna, lobster and swordfish, then highlight swordfish (14 HP, 211 gp) against monkfish (16 HP, 147 gp). <b>Line to land:</b> "Swordfish heals less and costs more. That only makes sense because free-to-play players can't buy monkfish. Prices can only line up when buyers can switch."</p>
+</section>
+
+<section class="scene" id="scene-3b">
+  <div class="scene-head"><span class="scene-num">Scene 3b</span><h2>What the market charges for each effect</h2></div>
+  <div class="frame"><svg id="s3b" viewBox="0 0 1000 562" role="img" aria-label="Bars showing each special food's price above or below the line"></svg>
+    <div class="caption">Price above or below the line<small>Same healing, different deal</small></div></div>
+  <p class="notes"><b>Beats:</b> pineapple pizza heals 22 per slot like a manta, but in two bites, and sells about 440 gp cheaper: that's the cost of the extra eat. Anglerfish's overheal costs about 300 gp more. Karambwan combo-eats yet sits 150 gp below the line, because karambwans are everywhere and the buyer at the margin doesn't need combo eating. <b>Line to land:</b> "Each gap is a price tag on a mechanic."</p>
+</section>
+
+<section class="scene" id="scene-3c">
+  <div class="scene-head"><span class="scene-num">Scene 3c</span><h2>Sailing fish, week by week</h2></div>
+  <div class="frame"><svg id="s3c" viewBox="0 0 1000 562" role="img" aria-label="Animated scatter: Sailing fish start far above the line at launch and settle over the following year"></svg>
+    <div class="caption">Sailing launch to now<small id="s3csub">Week of —</small></div></div>
+  <div class="controls"><button id="s3cplay">Play</button><input type="range" id="s3cwk" min="0" max="0" value="0" aria-label="Week"><span class="wk" id="s3cwklab">—</span></div>
+  <p class="notes"><b>Beats:</b> at launch every Sailing fish is scarce and far above the line (arrows show values off the top). Within weeks the low-level fish crash <i>below</i> the line: players train on krill and haddock and sell the catch regardless of price. Then they climb back toward it. Halibut and marlin stay high all year: their buyers fight where every tick of eating counts. <b>Line to land:</b> "New goods start mispriced, and you can watch the market find the line."</p>
+</section>
+
+<section class="scene" id="scene-4">
+  <div class="scene-head"><span class="scene-num">Scene 4</span><h2>Bluefin and yellowfin price their extras like potions</h2></div>
+  <div class="frame"><svg id="s4" viewBox="0 0 1000 562" role="img" aria-label="Bluefin's premium compared with the value of 5 prayer points, and yellowfin's premium compared with 20 percent run energy"></svg>
+    <div class="caption">The extra effect, priced by its potion<small>Premium = price above the line</small></div></div>
+  <p class="notes"><b>Beats:</b> bluefin restores 5 prayer. A prayer potion restores 124 points at 99 Prayer for 9,261 gp, so 5 points cost 373 gp; bluefin sits 399 gp above the line. Yellowfin restores 20% run energy; the cheapest way to buy that (energy potions) costs 78 gp, and yellowfin's premium is 45 gp, nowhere near the 538 gp it would cost in super energy. The weekly line shows bluefin's premium came down to the prayer value over the year. <b>Line to land:</b> "Two different resources, priced against each other by players who never did the arithmetic."</p>
+</section>
+
+<footer>Prices are average traded prices over the 8 weeks to 6 November 2026; the line is fitted on monkfish, shark, sea turtle, manta ray, dark crab and tuna potato. The weekly animation refits the line every week on those six only, so the Sailing fish are out-of-sample. Heals and effects from the OSRS Wiki.</footer>
+</main>
+
+<script>
+const D = __DATA__;
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const COL = { core: css('--core'), special: css('--special'), f2p: css('--f2p'), sailing: css('--sail') };
+const NS = 'http://www.w3.org/2000/svg';
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt = (v) => (v < 0 ? '−' : '') + Math.round(Math.abs(v)).toLocaleString('en-US');
+const SHORT = { 'Cooked karambwan': 'Karambwan', 'Pineapple pizza': 'Pineapple pizza' };
+const name = (n) => SHORT[n] || n;
+const sleep = (ms) => new Promise((r) => setTimeout(r, reduce ? 0 : ms));
+
+function el(tag, attrs, parent, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+/* a price-vs-heal chart: returns helpers to place marks */
+function plot(svg, xMax, yMin, yMax, yStep) {
+  svg.replaceChildren();
+  const M = { l: 86, r: 30, t: 120, b: 58 }, W = 1000, H = 562;
+  const X = (h) => M.l + (h / xMax) * (W - M.l - M.r);
+  const Y = (p) => H - M.b - ((p - yMin) / (yMax - yMin)) * (H - M.t - M.b);
+  const g = el('g', {}, svg);
+  for (let v = Math.ceil(yMin / yStep) * yStep; v <= yMax; v += yStep) {
+    el('line', { x1: M.l, x2: W - M.r, y1: Y(v), y2: Y(v), stroke: v === 0 ? css('--ink-2') : css('--grid'), 'stroke-width': v === 0 ? 1.2 : 1 }, g);
+    el('text', { x: M.l - 10, y: Y(v) + 5, 'text-anchor': 'end', 'font-size': 15, fill: css('--ink-2'), style: 'font-family:var(--mono)' }, g, fmt(v));
+  }
+  for (let h = 0; h <= xMax; h += xMax > 20 ? 4 : 2) {
+    el('text', { x: X(h), y: H - M.b + 24, 'text-anchor': 'middle', 'font-size': 15, fill: css('--ink-2'), style: 'font-family:var(--mono)' }, g, h);
+  }
+  el('text', { x: (M.l + W - M.r) / 2, y: H - 10, 'text-anchor': 'middle', 'font-size': 15, fill: css('--ink-2') }, g, 'HP healed per inventory slot');
+  el('text', { x: 18, y: (M.t + H - M.b) / 2, 'text-anchor': 'middle', 'font-size': 15, fill: css('--ink-2'), transform: `rotate(-90 18 ${(M.t + H - M.b) / 2})` }, g, 'Price (gp)');
+  const marks = el('g', {}, svg);
+  const labels = [];
+  return {
+    X, Y, M, marks,
+    resolve() {
+      const placed = [];
+      labels.sort((a, b) => a.x - b.x).forEach((t) => {
+        const bb = t.node.getBBox();
+        for (const off of [0, -19, 19, -38, 38, -57, 57, -76, 76]) {
+          const box = { x: bb.x - 2, y: bb.y + off - 1, w: bb.width + 4, h: bb.height + 2 };
+          const hit = placed.some((q) => box.x < q.x + q.w && q.x < box.x + box.w && box.y < q.y + q.h && q.y < box.y + box.h);
+          if (!hit || off === 76) {
+            t.node.setAttribute('y', +t.node.getAttribute('y') + off); placed.push(box);
+            if (off) el('line', { x1: t.dx + (t.right ? 7 : -7), y1: t.dy, x2: t.dx + (t.right ? 11 : -11), y2: t.dy + off, stroke: css('--ink-2'), 'stroke-width': 1 }, t.grp);
+            break;
+          }
+        }
+      });
+    },
+    line(c, lam, x0, x1, color, dash) {
+      return el('line', { x1: X(x0), y1: Y(c * x0 - lam), x2: X(x1), y2: Y(c * x1 - lam), stroke: color, 'stroke-width': 2.5, 'stroke-dasharray': dash || '' }, marks);
+    },
+    dot(p, color, labelSide) {
+      const grp = el('g', {}, marks);
+      const off = p.p > yMax;
+      const y = off ? M.t - 6 : Y(p.p);
+      if (off) el('path', { d: `M${X(p.h) - 9},${y + 8} L${X(p.h) + 9},${y + 8} L${X(p.h)},${y - 6} Z`, fill: color }, grp);
+      else el('circle', { cx: X(p.h), cy: y, r: 8, fill: color, stroke: css('--frame'), 'stroke-width': 2 }, grp);
+      const right = labelSide !== 'left';
+      const t = el('text', { x: X(p.h) + (right ? 13 : -13), y: y + 5, 'text-anchor': right ? 'start' : 'end', 'font-size': 15 }, grp,
+        name(p.n) + (off ? ` ${fmt(p.p)}` : ''));
+      labels.push({ node: t, x: X(p.h), dx: X(p.h), dy: y, right, grp });
+      return grp;
+    },
+  };
+}
+const P = Object.fromEntries(D.pts.map((p) => [p.n, p]));
+const SIDE = { 'Manta ray': 'left', 'Dark crab': 'left', 'Sea turtle': 'left', 'Bluefin': 'left', 'Haddock': 'left', 'Shark': 'left' };
+
+function fade(node, on) { node.style.transition = 'opacity 400ms'; node.style.opacity = on ? 1 : 0; }
+
+/* ---------- scene 1 */
+function scene1(final) {
+  const s = plot(document.getElementById('s1'), 24, -3000, 1600, 500);
+  const core = D.pts.filter((p) => p.g === 'core');
+  const dots = core.map((p) => s.dot(p, COL.core, SIDE[p.n]));
+  const line = s.line(D.c, D.lam, 15.25, 23.5, css('--line'));
+  const ext = s.line(D.c, D.lam, 0, 15.25, css('--line'), '7 6');
+  const zero = D.lam / D.c;
+  s.resolve();
+  const ann = el('g', {}, s.marks);
+  el('circle', { cx: s.X(zero), cy: s.Y(0), r: 6, fill: 'none', stroke: css('--ink'), 'stroke-width': 2 }, ann);
+  el('text', { x: s.X(zero) + 14, y: s.Y(0) + 30, 'font-size': 16 }, ann, `A ${zero.toFixed(0)} HP food is worth 0 gp`);
+  el('circle', { cx: s.X(0), cy: s.Y(-D.lam), r: 6, fill: css('--ink') }, ann);
+  el('text', { x: s.X(0) + 14, y: s.Y(-D.lam) + 5, 'font-size': 16 }, ann, `0 HP: −${fmt(D.lam)} gp = the value of a slot`);
+  if (final) return;
+  [...dots, line, ext, ann].forEach((n) => fade(n, false));
+  (async () => {
+    for (const d of dots) { fade(d, true); await sleep(450); }
+    await sleep(300); fade(line, true); await sleep(900); fade(ext, true); await sleep(700); fade(ann, true);
+  })();
+}
+
+/* ---------- scene 2 */
+const s2on = { special: true, f2p: true, sailing: true };
+function scene2(anim) {
+  const s = plot(document.getElementById('s2'), 26, -3000, 4000, 1000);
+  s.line(D.c, D.lam, 0, 25.5, css('--line'), '7 6');
+  D.pts.filter((p) => p.g === 'core').forEach((p) => s.dot(p, COL.core, SIDE[p.n]));
+  const groups = {};
+  for (const g of ['special', 'f2p', 'sailing']) {
+    groups[g] = el('g', {}, s.marks);
+    D.pts.filter((p) => p.g === g).forEach((p) => {
+      const d = s.dot(p, COL[g], SIDE[p.n]);
+      groups[g].appendChild(d);
+    });
+    groups[g].style.opacity = s2on[g] ? 1 : 0;
+  }
+  s.resolve();
+  if (!anim) return;
+  Object.values(groups).forEach((n) => (n.style.opacity = 0));
+  (async () => { await sleep(500); for (const g of ['f2p', 'special', 'sailing']) { fade(groups[g], true); await sleep(1400); } })();
+}
+document.querySelectorAll('#scene-2 [data-g]').forEach((b) => b.addEventListener('click', () => {
+  const g = b.dataset.g; s2on[g] = !s2on[g]; b.setAttribute('aria-pressed', s2on[g]); scene2(false);
+}));
+
+/* ---------- scene 3a */
+function scene3a() {
+  const s = plot(document.getElementById('s3a'), 18, -800, 400, 200);
+  s.line(D.c, D.lam, 11, 17.5, css('--line'), '7 6');
+  el('text', { x: s.X(11.6) + 10, y: s.Y(-720), 'font-size': 15, fill: css('--ink-2') }, s.marks, 'members line');
+  s.line(D.f2p.c, D.f2p.lam, 6, 17.5, COL.f2p);
+  el('text', { x: s.X(17.4), y: s.Y(D.f2p.c * 17.4 - D.f2p.lam) - 12, 'text-anchor': 'end', 'font-size': 15, fill: COL.f2p }, s.marks, 'free-to-play line');
+  D.pts.filter((p) => p.g === 'f2p').forEach((p) => s.dot(p, COL.f2p, SIDE[p.n]));
+  s.dot(P['Monkfish'], COL.core, 'right');
+  const sw = P['Swordfish'], mk = P['Monkfish'];
+  el('text', { x: s.X(1), y: s.Y(-450), 'font-size': 17 }, s.marks, `Swordfish heals ${mk.h - sw.h} HP less than monkfish`);
+  el('text', { x: s.X(1), y: s.Y(-450) + 24, 'font-size': 17 }, s.marks, `but costs ${fmt(sw.p - mk.p)} gp more`);
+  s.resolve();
+}
+
+/* ---------- scene 3b */
+function scene3b() {
+  const svg = document.getElementById('s3b'); svg.replaceChildren();
+  const items = [['Anglerfish', 'overheal'], ['Cooked karambwan', 'combo eat'], ['Pineapple pizza', 'two bites']];
+  const W = 1000, H = 562, mid = 560, sc = 0.55;
+  el('line', { x1: mid, x2: mid, y1: 150, y2: 500, stroke: css('--ink-2'), 'stroke-width': 1.5 }, svg);
+  el('text', { x: mid, y: 530, 'text-anchor': 'middle', 'font-size': 15, fill: css('--ink-2') }, svg, 'on the line');
+  items.forEach(([n, why], i) => {
+    const p = P[n], gap = p.p - p.pred, y = 190 + i * 110;
+    el('rect', { x: gap >= 0 ? mid : mid + gap * sc, y: y, width: Math.abs(gap) * sc, height: 48, rx: 3, fill: COL.special, opacity: gap >= 0 ? 1 : 0.75 }, svg);
+    el('text', { x: 60, y: y + 22, 'font-size': 20, 'font-weight': 500 }, svg, name(n));
+    el('text', { x: 60, y: y + 44, 'font-size': 15, fill: css('--ink-2') }, svg, `${why} · ${p.h} HP`);
+    el('text', { x: gap >= 0 ? mid + gap * sc + 12 : mid + gap * sc - 12, y: y + 31, 'text-anchor': gap >= 0 ? 'start' : 'end', 'font-size': 19, style: 'font-family:var(--mono)' }, svg, (gap >= 0 ? '+' : '') + fmt(gap) + ' gp');
+  });
+}
+
+/* ---------- scene 3c (animated weeks) */
+const W3 = D.weeks;
+const wkInput = document.getElementById('s3cwk'); wkInput.max = W3.length - 1; wkInput.value = W3.length - 1;
+function scene3c(i) {
+  const w = W3[i];
+  const s = plot(document.getElementById('s3c'), 26, -3000, 6000, 1000);
+  s.line(w.c, w.lam, 0, 25.5, css('--line'), '7 6');
+  for (const [n, p] of Object.entries(w.p)) {
+    const base = P[n]; if (!base || p === null) continue;
+    if (base.g === 'core') s.dot({ n, h: base.h, p }, COL.core, SIDE[n]);
+    if (base.g === 'sailing') s.dot({ n, h: base.h, p }, COL.sailing, SIDE[n]);
+  }
+  s.resolve();
+  const d = new Date(w.wk + 'T00:00:00Z');
+  const lab = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  document.getElementById('s3csub').textContent = 'Week of ' + lab;
+  document.getElementById('s3cwklab').textContent = lab;
+}
+wkInput.addEventListener('input', () => scene3c(+wkInput.value));
+let timer = null;
+document.getElementById('s3cplay').addEventListener('click', (e) => {
+  if (timer) { clearInterval(timer); timer = null; e.target.textContent = 'Play'; return; }
+  let i = +wkInput.value >= W3.length - 1 ? 0 : +wkInput.value;
+  e.target.textContent = 'Pause';
+  timer = setInterval(() => {
+    wkInput.value = i; scene3c(i); i++;
+    if (i >= W3.length) { clearInterval(timer); timer = null; e.target.textContent = 'Play'; }
+  }, reduce ? 50 : 420);
+});
+
+/* ---------- scene 4 */
+function scene4() {
+  const svg = document.getElementById('s4'); svg.replaceChildren();
+  const bf = P['Bluefin'], yf = P['Yellowfin'];
+  const bPrem = bf.p - bf.pred, yPrem = yf.p - yf.pred;
+  const pray5 = 5 * D.pots.prayer4 / 124, en = D.pots.energy4 / 2, se = D.pots.super_energy4 / 4;
+  const bars = [
+    { y: 150, lab: 'Bluefin premium', v: bPrem, c: COL.sailing },
+    { y: 196, lab: '5 prayer points (prayer potion)', v: pray5, c: css('--ink-2') },
+    { y: 290, lab: 'Yellowfin premium', v: yPrem, c: COL.sailing },
+    { y: 336, lab: '20% run (energy potion)', v: en, c: css('--ink-2') },
+    { y: 382, lab: '20% run (super energy)', v: se, c: css('--rule') },
+  ];
+  const x0 = 300, sc = 0.48;
+  bars.forEach((b) => {
+    el('rect', { x: x0, y: b.y, width: Math.max(2, b.v * sc), height: 34, rx: 3, fill: b.c }, svg);
+    el('text', { x: x0 - 12, y: b.y + 23, 'text-anchor': 'end', 'font-size': 16 }, svg, b.lab);
+    el('text', { x: x0 + Math.max(2, b.v * sc) + 10, y: b.y + 23, 'font-size': 17, style: 'font-family:var(--mono)' }, svg, fmt(b.v) + ' gp');
+  });
+  /* weekly inset: bluefin premium vs prayer value, from February on */
+  const pts = D.weeks.map((w) => ({ t: w.wk, a: w.blue_prem, b: w.prayer5 })).filter((r) => r.a !== null && r.t >= '2026-02-01');
+  const L = 560, R = 975, T = 430, B = 545, ymax = 1000;
+  const X = (i) => L + (i / (pts.length - 1)) * (R - L), Y = (v) => B - (Math.min(v, ymax) / ymax) * (B - T);
+  el('text', { x: 60, y: 470, 'font-size': 16 }, svg, 'Bluefin premium, weekly, Feb–Nov 2026');
+  el('text', { x: 60, y: 494, 'font-size': 15, fill: css('--ink-2') }, svg, 'came down to meet the prayer value');
+  el('line', { x1: 60, x2: 90, y1: 518, y2: 518, stroke: COL.sailing, 'stroke-width': 2.5 }, svg);
+  el('text', { x: 98, y: 523, 'font-size': 14, fill: css('--ink-2') }, svg, 'premium');
+  el('line', { x1: 180, x2: 210, y1: 518, y2: 518, stroke: css('--ink-2'), 'stroke-width': 2, 'stroke-dasharray': '5 4' }, svg);
+  el('text', { x: 218, y: 523, 'font-size': 14, fill: css('--ink-2') }, svg, '5 prayer points');
+  el('line', { x1: L, x2: R, y1: B, y2: B, stroke: css('--rule') }, svg);
+  el('text', { x: L - 8, y: Y(1000) + 5, 'text-anchor': 'end', 'font-size': 13, fill: css('--ink-2'), style: 'font-family:var(--mono)' }, svg, '1,000');
+  el('text', { x: L - 8, y: B + 5, 'text-anchor': 'end', 'font-size': 13, fill: css('--ink-2'), style: 'font-family:var(--mono)' }, svg, '0');
+  const path = (k) => pts.map((r, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(r[k]).toFixed(1)}`).join(' ');
+  el('path', { d: path('b'), fill: 'none', stroke: css('--ink-2'), 'stroke-width': 2, 'stroke-dasharray': '5 4' }, svg);
+  el('path', { d: path('a'), fill: 'none', stroke: COL.sailing, 'stroke-width': 2.5 }, svg);
+}
+
+/* ---------- boot: everything rests finished */
+scene1(true); scene2(false); scene3a(); scene3b(); scene3c(W3.length - 1); scene4();
+document.getElementById('s1play').addEventListener('click', () => scene1(false));
+document.getElementById('s2play').addEventListener('click', () => scene2(true));
+</script>
+</body>
+</html>
