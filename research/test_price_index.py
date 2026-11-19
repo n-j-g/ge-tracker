@@ -15,6 +15,14 @@ from pathlib import Path
 from research import daily_extract
 from research.backfill_history import SCHEMA
 
+try:  # the index itself needs pandas/numpy; the hourly CI build is standard-library only
+    import numpy  # noqa: F401
+    import pandas  # noqa: F401
+    HAVE_PANDAS = True
+except ImportError:
+    HAVE_PANDAS = False
+needs_pandas = unittest.skipUnless(HAVE_PANDAS, "needs pandas and numpy (research only)")
+
 START = 1_617_235_200  # 2021-04-01 00:00 UTC
 DAYS = 3 * 365 + 40
 # name: (start price, yearly growth, items traded per hour)
@@ -62,6 +70,7 @@ class PriceIndexTest(unittest.TestCase):
         with redirect_stdout(io.StringIO()):
             return price_index.run(out, tmp / "results"), tmp / "results"
 
+    @needs_pandas
     def test_uniform_inflation(self):
         import pandas as pd
         with tempfile.TemporaryDirectory() as t:
@@ -76,6 +85,7 @@ class PriceIndexTest(unittest.TestCase):
             items = pd.read_csv(res / "items.csv", index_col=0)
             self.assertLess(items.vs_basket.abs().max(), 0.01)
 
+    @needs_pandas
     def test_weights_by_gold_spent(self):
         import pandas as pd
         with tempfile.TemporaryDirectory() as t:
